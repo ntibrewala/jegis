@@ -75,20 +75,41 @@ namespace GIS.Framework.Helpers
             LoggerHelper.Log($"No valid token in cache. Making live HTTP call to {authUrl}...");
             var tokenResponse = await HttpHelper.GetAsync<TokenResponse>(authUrl, headers);
             
-            if (tokenResponse.Status == 1 && tokenResponse.Data != null)
-            {
-                LoggerHelper.Log("Live fetch successful. Saving new token back to database cache...");
-                CredentialManager.SaveTokenToCache(
-                    dbHelper, 
-                    credentials.GSTIN, 
-                    tokenResponse.Data.ClientId, 
-                    tokenResponse.Data.UserName, 
-                    tokenResponse.Data.AuthToken, 
-                    tokenResponse.Data.TokenExpiry
-                );
-            }
+            bool isSuccess = tokenResponse.Status == 1 || tokenResponse.status == "1";
+            string newToken = tokenResponse.Data?.AuthToken ?? tokenResponse.authtoken;
 
-            return tokenResponse;
+            if (isSuccess && !string.IsNullOrEmpty(newToken))
+            {
+                LoggerHelper.Log($"Successfully fetched new AuthToken from CharteredInfo API.");
+                
+                // 3. Cache the Token in SAP DB
+                string calculatedExpiry = DateTime.Now.AddHours(6).ToString("yyyy-MM-dd HH:mm:ss");
+                try {
+                    CredentialManager.SaveTokenToCache(
+                        dbHelper, 
+                        credentials.GSTIN, 
+                        credentials.ClientId ?? "", 
+                        credentials.UserName, 
+                        newToken, 
+                        calculatedExpiry
+                    );
+                    LoggerHelper.Log($"Successfully cached new AuthToken for GSTIN {credentials.GSTIN}.");
+                } catch (Exception ex) {
+                    LoggerHelper.Log($"Warning: Failed to cache AuthToken to TEC_AUTHTOKEN. Error: {ex.Message}");
+                }
+                
+                // Populate Data for downstream consumers if flat format
+                if (tokenResponse.Data == null)
+                {
+                    tokenResponse.Data = new TokenData { AuthToken = newToken, TokenExpiry = calculatedExpiry };
+                }
+                
+                return tokenResponse;
+            }
+            else
+            {
+                throw new Exception($"Auth API Error: {tokenResponse.ErrorDetails ?? "Unknown Error or Missing Token"}");
+            }
         }
 
         public static TokenResponse GetCharteredAuthTokenSync(IDatabaseHelper dbHelper, string objType, string docEntry)
