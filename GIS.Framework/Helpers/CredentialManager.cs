@@ -54,8 +54,15 @@ namespace GIS.Framework.Helpers
             // We use standard UPSERT logic (or delete/insert) to cache the token for this GSTIN
             string safeExpiry = string.IsNullOrEmpty(tokenExpiryString) ? "NULL" : $"'{tokenExpiryString}'";
             
-            // Use the OLD procedure to insert the token so both systems share it!
-            string insertQuery = $"CALL \"TEC_EInvoiceToken\" ('INSERT', '{authToken}', '{gstin}')";
+            // Delete old token
+            string deleteQuery = $"DELETE FROM \"TEC_AUTHTOKEN\" WHERE \"GSTIN\" = '{gstin}'";
+            dbHelper.ExecuteNonQuery(deleteQuery);
+            
+            // Insert new token
+            string insertQuery = $@"
+                INSERT INTO ""TEC_AUTHTOKEN"" (""GSTIN"", ""ClientId"", ""UserName"", ""Type"", ""AuthToken"", ""TokenExpiry"", ""CreateDate"")
+                VALUES ('{gstin}', '{clientId}', '{userName}', 'E-Invoice', '{authToken}', {safeExpiry}, CURRENT_TIMESTAMP)";
+                
             dbHelper.ExecuteNonQuery(insertQuery);
         }
     }
