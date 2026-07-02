@@ -9,53 +9,9 @@ namespace GIS.Framework.Helpers
     {
         public static ApiCredentials GetCredentialsForDocument(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
-            string whsQuery = "";
-            if (objType == "13" || objType == "Invoice") whsQuery = $"SELECT MAX(\"WhsCode\") FROM \"INV1\" WHERE \"DocEntry\" = {docEntry}";
-            else if (objType == "14" || objType == "CreditMemo") whsQuery = $"SELECT MAX(\"WhsCode\") FROM \"RIN1\" WHERE \"DocEntry\" = {docEntry}";
-            else if (objType == "67" || objType == "Transfer") whsQuery = $"SELECT MAX(\"WhsCode\") FROM \"WTR1\" WHERE \"DocEntry\" = {docEntry}";
-
-            string gstin = null;
-            if (!string.IsNullOrEmpty(whsQuery))
-            {
-                DataTable dtWhs = dbHelper.ExecuteQuery(whsQuery);
-                if (dtWhs != null && dtWhs.Rows.Count > 0 && dtWhs.Rows[0][0] != DBNull.Value)
-                {
-                    string whsCode = dtWhs.Rows[0][0].ToString();
-                    string locQuery = $"SELECT MAX(\"Location\") FROM \"OWHS\" WHERE \"WhsCode\" = '{whsCode}'";
-                    DataTable dtLoc = dbHelper.ExecuteQuery(locQuery);
-                    
-                    if (dtLoc != null && dtLoc.Rows.Count > 0 && dtLoc.Rows[0][0] != DBNull.Value)
-                    {
-                        string locCode = dtLoc.Rows[0][0].ToString();
-                        string stateQuery = $"SELECT MAX(T1.\"GSTCode\") FROM \"OLCT\" T0 INNER JOIN \"OCST\" T1 ON T0.\"State\" = T1.\"Code\" AND T1.\"Country\" = 'IN' WHERE T0.\"Code\" = {locCode}";
-                        DataTable dtState = dbHelper.ExecuteQuery(stateQuery);
-                        
-                        if (dtState != null && dtState.Rows.Count > 0 && dtState.Rows[0][0] != DBNull.Value)
-                        {
-                            string stateCode = dtState.Rows[0][0].ToString();
-                            string gstinQuery = $"SELECT MAX(\"U_GSTIN\") FROM \"@GIS_EI_OGST\" WHERE \"Name\" = '{stateCode}'";
-                            DataTable dtGstin = dbHelper.ExecuteQuery(gstinQuery);
-                            
-                            if (dtGstin != null && dtGstin.Rows.Count > 0 && dtGstin.Rows[0][0] != DBNull.Value)
-                            {
-                                gstin = dtGstin.Rows[0][0].ToString();
-                            }
-                        }
-                    }
-                }
-            }
-
-            string finalQuery = "";
-            if (string.IsNullOrEmpty(gstin))
-            {
-                finalQuery = "SELECT TOP 1 A.\"U_GSTIN\", A.\"U_AspID\", A.\"U_AspPwd\", A.\"U_UserName\", A.\"U_Password\", A.\"U_CltID\", A.\"U_CltSecrt\", T.\"AuthToken\", T.\"TokenExpiry\" FROM \"@GIS_EI_OGST\" A LEFT JOIN \"TEC_AUTHTOKEN\" T ON A.\"U_GSTIN\" = T.\"GSTIN\" AND T.\"Type\" = 'E-Invoice' AND T.\"TokenExpiry\" > CURRENT_TIMESTAMP";
-            }
-            else
-            {
-                finalQuery = $"SELECT TOP 1 A.\"U_GSTIN\", A.\"U_AspID\", A.\"U_AspPwd\", A.\"U_UserName\", A.\"U_Password\", A.\"U_CltID\", A.\"U_CltSecrt\", T.\"AuthToken\", T.\"TokenExpiry\" FROM \"@GIS_EI_OGST\" A LEFT JOIN \"TEC_AUTHTOKEN\" T ON A.\"U_GSTIN\" = T.\"GSTIN\" AND T.\"Type\" = 'E-Invoice' AND T.\"TokenExpiry\" > CURRENT_TIMESTAMP WHERE A.\"U_GSTIN\" = '{gstin}'";
-            }
+            string query = $"CALL \"TEC_COMBINED_TOKEN_GET\" ('{objType}', '{docEntry}')";
             
-            DataTable result = dbHelper.ExecuteQuery(finalQuery);
+            DataTable result = dbHelper.ExecuteQuery(query);
             
             if (result == null || result.Rows.Count == 0)
             {
@@ -66,13 +22,13 @@ namespace GIS.Framework.Helpers
             
             var creds = new ApiCredentials
             {
-                GSTIN = row["U_GSTIN"]?.ToString(),
-                AspId = row["U_AspID"]?.ToString(),
-                AspPassword = row["U_AspPwd"]?.ToString(),
-                UserName = row["U_UserName"]?.ToString(),
-                ApiPassword = row["U_Password"]?.ToString(),
-                ClientId = row["U_CltID"]?.ToString(),
-                ClientSecret = row["U_CltSecrt"]?.ToString()
+                GSTIN = row["GSTIN"]?.ToString(),
+                AspId = row["AspId"]?.ToString(),
+                AspPassword = row["AspPassword"]?.ToString(),
+                UserName = row["UserName"]?.ToString(),
+                ApiPassword = row["ApiPassword"]?.ToString(),
+                ClientId = row["ClientId"]?.ToString(),
+                ClientSecret = row["ClientSecret"]?.ToString()
             };
 
             // Safely parse the token information if it exists in the cache
