@@ -12,8 +12,6 @@ namespace GIS.Framework.Helpers
     /// </summary>
     public static class AuthHelper
     {
-        private const string AUTH_URL = "https://gstsandbox.charteredinfo.com/eivital/dec/v1.04/auth";
-
         public static async Task<TokenResponse> GetCharteredAuthTokenAsync(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
             LoggerHelper.Log($"Starting CharteredAuthToken fetch process for ObjType: {objType}, DocEntry: {docEntry}...");
@@ -49,6 +47,19 @@ namespace GIS.Framework.Helpers
                 };
             }
 
+            // Fetch dynamic AUTH_URL from database
+            string authUrl = "";
+            string urlQuery = "SELECT MAX(\"U_Url\") FROM \"@GIS_EW_OAPI\" WHERE \"U_Action\" = 'GenerateKey'";
+            var dtUrl = dbHelper.ExecuteQuery(urlQuery);
+            if (dtUrl != null && dtUrl.Rows.Count > 0 && dtUrl.Rows[0][0] != DBNull.Value)
+            {
+                authUrl = dtUrl.Rows[0][0].ToString();
+            }
+            if (string.IsNullOrEmpty(authUrl))
+            {
+                authUrl = "https://gstsandbox.charteredinfo.com/eivital/dec/v1.04/auth"; // fallback
+            }
+
             // 2. Map DB Credentials to HTTP Headers
             var headers = new Dictionary<string, string>
             {
@@ -59,8 +70,8 @@ namespace GIS.Framework.Helpers
                 { "eInvPwd", credentials.ApiPassword }
             };
             
-            LoggerHelper.Log("No valid token in cache. Making live HTTP call to CharteredInfo...");
-            var tokenResponse = await HttpHelper.GetAsync<TokenResponse>(AUTH_URL, headers);
+            LoggerHelper.Log($"No valid token in cache. Making live HTTP call to {authUrl}...");
+            var tokenResponse = await HttpHelper.GetAsync<TokenResponse>(authUrl, headers);
             
             if (tokenResponse.Status == 1 && tokenResponse.Data != null)
             {
