@@ -18,8 +18,12 @@ namespace GIS.Framework.Helpers
             // 1. Log the RAW request/response into TEC_EW_LOG
             string safePayload = payload.Replace("'", "''");
             string safeResponse = apiResponse.Replace("'", "''");
-            string logQuery = $"INSERT INTO \"TEC_EW_LOG\" VALUES('{docEntry}', '{objType}', '{safePayload}', '{safeResponse}', CURRENT_TIMESTAMP, 'System')";
-            dbHelper.ExecuteNonQuery(logQuery);
+            string logQuery = $"INSERT INTO \"TEC_EW_LOG\" (\"DocEntry\", \"ObjType\", \"Request\", \"Response\", \"CreateDate\", \"UserSign\") VALUES('{docEntry}', '{objType}', '{safePayload}', '{safeResponse}', CURRENT_TIMESTAMP, 'System')";
+            try {
+                dbHelper.ExecuteNonQuery(logQuery);
+            } catch (Exception ex) {
+                LoggerHelper.Log($"Failed to write to TEC_EW_LOG: {ex.Message}");
+            }
 
             try
             {
@@ -96,8 +100,12 @@ namespace GIS.Framework.Helpers
             // 1. Log the RAW request/response into TEC_EW_LOG
             string safePayload = payload.Replace("'", "''");
             string safeResponse = apiResponse.Replace("'", "''");
-            string logQuery = $"INSERT INTO \"TEC_EW_LOG\" VALUES('{docEntry}', '{objType}', '{safePayload}', '{safeResponse}', CURRENT_TIMESTAMP, 'System')";
-            dbHelper.ExecuteNonQuery(logQuery);
+            string logQuery = $"INSERT INTO \"TEC_EW_LOG\" (\"DocEntry\", \"ObjType\", \"Request\", \"Response\", \"CreateDate\", \"UserSign\") VALUES('{docEntry}', '{objType}', '{safePayload}', '{safeResponse}', CURRENT_TIMESTAMP, 'System')";
+            try {
+                dbHelper.ExecuteNonQuery(logQuery);
+            } catch (Exception ex) {
+                LoggerHelper.Log($"Failed to write to TEC_EW_LOG: {ex.Message}");
+            }
 
             try
             {
