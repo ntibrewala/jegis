@@ -61,13 +61,15 @@ namespace GIS.Framework.Helpers
             }
 
             // 2. Map DB Credentials to HTTP Headers
+            // The Production Chartered Info API v1.03 is strict about header casing and requires EwbPwd for combined generation
             var headers = new Dictionary<string, string>
             {
                 { "aspid", credentials.AspId },
                 { "password", credentials.AspPassword },
-                { "gstin", credentials.GSTIN },
-                { "user_name", credentials.UserName },
-                { "eInvPwd", credentials.ApiPassword }
+                { "Gstin", credentials.GSTIN },             // Strictly 'Gstin'
+                { "UserName", credentials.UserName },       // Strictly 'UserName'
+                { "eInvPwd", credentials.ApiPassword },     // Required for E-Invoice token
+                { "EwbPwd", credentials.ApiPassword }       // Required for E-Way Bill token in v1.03
             };
             
             LoggerHelper.Log($"No valid token in cache. Making live HTTP call to {authUrl}...");
