@@ -49,7 +49,7 @@ namespace GIS.Framework.Helpers
 
             // Fetch dynamic AUTH_URL from database
             string authUrl = "";
-            string urlQuery = "SELECT MAX(\"U_Url\") FROM \"@GIS_EW_OAPI\" WHERE \"U_Action\" = 'GenerateKey'";
+            string urlQuery = "SELECT MAX(\"U_Url\") FROM \"@GIS_EI_OAPI\" WHERE \"U_Action\" = 'GenerateKey'";
             var dtUrl = dbHelper.ExecuteQuery(urlQuery);
             if (dtUrl != null && dtUrl.Rows.Count > 0 && dtUrl.Rows[0][0] != DBNull.Value)
             {
@@ -68,8 +68,7 @@ namespace GIS.Framework.Helpers
                 { "password", credentials.AspPassword },
                 { "Gstin", credentials.GSTIN },             // Strictly 'Gstin'
                 { "UserName", credentials.UserName },       // Strictly 'UserName'
-                { "eInvPwd", credentials.ApiPassword },     // Required for E-Invoice token
-                { "EwbPwd", credentials.ApiPassword }       // Required for E-Way Bill token in v1.03
+                { "eInvPwd", credentials.ApiPassword }      // Required for E-Invoice token
             };
             
             LoggerHelper.Log($"No valid token in cache. Making live HTTP call to {authUrl}...");
