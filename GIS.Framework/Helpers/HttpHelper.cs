@@ -39,10 +39,13 @@ namespace GIS.Framework.Helpers
                     using (var response = await _httpClient.SendAsync(request))
                     {
                         LoggerHelper.Log($"Received response with StatusCode: {(int)response.StatusCode}");
-                        response.EnsureSuccessStatusCode();
-                        
                         string json = await response.Content.ReadAsStringAsync();
-                        LoggerHelper.Log($"Deserializing JSON response: {json}");
+                        LoggerHelper.Log($"Response body: {json}");
+                        
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            LoggerHelper.Log($"Warning: API returned non-success status code {(int)response.StatusCode}. Attempting to parse error JSON...");
+                        }
                         
                         return JsonConvert.DeserializeObject<T>(json);
                     }

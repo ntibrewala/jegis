@@ -68,8 +68,7 @@ namespace GIS.Framework.Helpers
                 { "password", credentials.AspPassword },
                 { "Gstin", credentials.GSTIN },             // Strictly 'Gstin'
                 { "UserName", credentials.UserName },       // Strictly 'UserName'
-                { "eInvPwd", credentials.ApiPassword },     // Required for E-Invoice token
-                { "EwbPwd", credentials.ApiPassword }       // Required for E-Way Bill token in v1.03
+                { "eInvPwd", credentials.ApiPassword }      // Required for E-Invoice token
             };
             
             LoggerHelper.Log($"No valid token in cache. Making live HTTP call to {authUrl}...");
