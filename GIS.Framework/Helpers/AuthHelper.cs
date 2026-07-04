@@ -67,7 +67,7 @@ namespace GIS.Framework.Helpers
                 { "aspid", credentials.AspId },
                 { "password", credentials.AspPassword },
                 { "Gstin", credentials.GSTIN },             // Strictly 'Gstin'
-                { "UserName", credentials.UserName },       // Strictly 'UserName'
+                { "user_name", credentials.UserName },       // Strictly 'user_name' in v1.04
                 { "eInvPwd", credentials.ApiPassword }      // Required for E-Invoice token
             };
             
@@ -107,7 +107,7 @@ namespace GIS.Framework.Helpers
             }
             else
             {
-                throw new Exception($"Auth API Error: {tokenResponse.ErrorDetails ?? "Unknown Error or Missing Token"}");
+                throw new Exception($"Auth API Error: {tokenResponse.error?.message ?? tokenResponse.ErrorDetails ?? "Unknown Error or Missing Token"}");
             }
         }
 

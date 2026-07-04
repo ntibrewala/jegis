@@ -7,5 +7,11 @@ namespace GIS.Framework.Models
         public TokenData Data { get; set; }
         public string authtoken { get; set; }
         public string ErrorDetails { get; set; }
+        public ErrorResponse error { get; set; }
+    }
+
+    public class ErrorResponse
+    {
+        public string message { get; set; }
     }
 }
