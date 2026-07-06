@@ -73,7 +73,7 @@ namespace GIS.Framework.Helpers
                             TransporterId = string.IsNullOrEmpty(transId) ? null : transId,
                             TransporterName = string.IsNullOrEmpty(transName) ? null : transName,
                             TransporterMode = string.IsNullOrEmpty(transMode) ? null : transMode,
-                            Distance = ewbRow.Table.Columns.Contains("transDistance") && ewbRow["transDistance"] != DBNull.Value && !string.IsNullOrEmpty(ewbRow["transDistance"].ToString()) ? Convert.ToInt32(ewbRow["transDistance"]) : 0,
+                            Distance = GetDistanceWithCache(dbHelper, ewbRow),
                             TransporterDocNo = string.IsNullOrEmpty(transDocNo) ? null : transDocNo,
                             TransporterDocDate = string.IsNullOrEmpty(transDocDt) ? null : transDocDt,
                             VehicleNo = string.IsNullOrEmpty(vehNo) ? null : vehNo,
@@ -146,7 +146,7 @@ namespace GIS.Framework.Helpers
                         else 
                         {
                             if (colName == "transactionType") payload[colName] = 1; // Default transaction type
-                            else if (colName == "transDistance") payload[colName] = 0; // Default distance
+                            else if (colName == "transDistance") payload[colName] = GetDistanceWithCache(dbHelper, hRow); // Check cache
                             else if (string.IsNullOrEmpty(val)) { /* Omit completely from Dictionary to avoid 'Invalid Json' */ }
                             else payload[colName] = val; // Fallback
                         }
@@ -279,6 +279,53 @@ namespace GIS.Framework.Helpers
             if (string.IsNullOrEmpty(targetUrl)) throw new Exception("Target URL for CancelEWay missing.");
 
             return new Tuple<string, string>(jsonPayload, targetUrl);
+        }
+
+        private static int GetDistanceWithCache(IDatabaseHelper dbHelper, DataRow row)
+        {
+            int transDist = 0;
+            if (row.Table.Columns.Contains("transDistance") && row["transDistance"] != DBNull.Value && !string.IsNullOrEmpty(row["transDistance"].ToString()))
+            {
+                transDist = Convert.ToInt32(row["transDistance"]);
+            }
+
+            string fromPin = row.Table.Columns.Contains("fromPincode") ? row["fromPincode"].ToString().Trim() : "";
+            string toPin = row.Table.Columns.Contains("toPincode") ? row["toPincode"].ToString().Trim() : "";
+
+            if (transDist == 0 && !string.IsNullOrEmpty(fromPin) && fromPin == toPin)
+            {
+                string fromAddr = (row.Table.Columns.Contains("fromAddr1") ? row["fromAddr1"].ToString() : "") + " " + (row.Table.Columns.Contains("fromPlace") ? row["fromPlace"].ToString() : "");
+                string toAddr = (row.Table.Columns.Contains("toAddr1") ? row["toAddr1"].ToString() : "") + " " + (row.Table.Columns.Contains("toPlace") ? row["toPlace"].ToString() : "");
+
+                fromAddr = fromAddr.Trim().Replace("'", "").Replace("\"", "");
+                toAddr = toAddr.Trim().Replace("'", "").Replace("\"", "");
+                
+                // Truncate to reasonable lengths for a cache key
+                if (fromAddr.Length > 50) fromAddr = fromAddr.Substring(0, 50);
+                if (toAddr.Length > 50) toAddr = toAddr.Substring(0, 50);
+                
+                string routeHash = (fromAddr + "_" + toAddr).Replace(" ", "").ToUpper();
+                if (routeHash.Length > 100) routeHash = routeHash.Substring(0, 100);
+
+                // Ensure table exists (create if not)
+                try
+                {
+                    dbHelper.ExecuteQuery(@"CREATE TABLE ""GIS_DIST_CACHE"" ( ""Code"" NVARCHAR(100) PRIMARY KEY, ""FromAddr"" NVARCHAR(250), ""ToAddr"" NVARCHAR(250), ""Distance"" INT )");
+                }
+                catch { /* Table likely already exists */ }
+
+                var dtCache = dbHelper.ExecuteQuery($@"SELECT ""Distance"" FROM ""GIS_DIST_CACHE"" WHERE ""Code"" = '{routeHash}'");
+                if (dtCache != null && dtCache.Rows.Count > 0)
+                {
+                    transDist = Convert.ToInt32(dtCache.Rows[0][0]);
+                }
+                else
+                {
+                    throw new Exception($"MISSING_DISTANCE|{routeHash}|{fromAddr}|{toAddr}");
+                }
+            }
+
+            return transDist;
         }
     }
 }

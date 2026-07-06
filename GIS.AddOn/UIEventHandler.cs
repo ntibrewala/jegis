@@ -397,8 +397,42 @@ namespace GIS.AddOn
             }
             catch (Exception ex)
             {
-                LoggerHelper.Log($"Error in UI Event: {ex.Message}");
-                _connectionManager?.SboApplication?.StatusBar?.SetText($"Error: {ex.Message}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
+                if (ex.Message.StartsWith("MISSING_DISTANCE|"))
+                {
+                    var parts = ex.Message.Split('|');
+                    if (parts.Length == 4)
+                    {
+                        string routeHash = parts[1];
+                        string fromAddr = parts[2];
+                        string toAddr = parts[3];
+                        
+                        string promptMsg = $"Local Route Detected (Same Pincodes).\nPlease enter the exact distance in Kilometers between:\n\nFROM: {fromAddr}\nTO: {toAddr}";
+                        string inputDist = Microsoft.VisualBasic.Interaction.InputBox(promptMsg, "Distance Required", "15");
+                        
+                        if (!string.IsNullOrEmpty(inputDist) && int.TryParse(inputDist, out int dist))
+                        {
+                            try
+                            {
+                                var dbH = new DatabaseHelper(_connectionManager.Company);
+                                dbH.ExecuteQuery($@"INSERT INTO ""GIS_DIST_CACHE"" (""Code"", ""FromAddr"", ""ToAddr"", ""Distance"") VALUES ('{routeHash}', '{fromAddr.Replace("'", "''")}', '{toAddr.Replace("'", "''")}', {dist})");
+                                _connectionManager?.SboApplication?.MessageBox("Distance saved to cache! Please click Generate again.");
+                            }
+                            catch (Exception saveEx)
+                            {
+                                _connectionManager?.SboApplication?.MessageBox($"Failed to save distance: {saveEx.Message}");
+                            }
+                        }
+                        else
+                        {
+                            _connectionManager?.SboApplication?.StatusBar?.SetText("Distance entry cancelled or invalid.", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
+                        }
+                    }
+                }
+                else
+                {
+                    LoggerHelper.Log($"Error in UI Event: {ex.Message}");
+                    _connectionManager?.SboApplication?.StatusBar?.SetText($"Error: {ex.Message}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
+                }
             }
         }
     }
