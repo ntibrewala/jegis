@@ -307,13 +307,7 @@ namespace GIS.Framework.Helpers
                 string routeHash = (fromAddr + "_" + toAddr).Replace(" ", "").ToUpper();
                 if (routeHash.Length > 100) routeHash = routeHash.Substring(0, 100);
 
-                // Ensure table exists (create if not)
-                try
-                {
-                    dbHelper.ExecuteQuery(@"CREATE TABLE ""GIS_DIST_CACHE"" ( ""Code"" NVARCHAR(100) PRIMARY KEY, ""FromAddr"" NVARCHAR(250), ""ToAddr"" NVARCHAR(250), ""Distance"" INT )");
-                }
-                catch { /* Table likely already exists */ }
-
+                // Check cache
                 var dtCache = dbHelper.ExecuteQuery($@"SELECT ""Distance"" FROM ""GIS_DIST_CACHE"" WHERE ""Code"" = '{routeHash}'");
                 if (dtCache != null && dtCache.Rows.Count > 0)
                 {
