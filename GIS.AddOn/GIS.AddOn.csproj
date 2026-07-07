@@ -24,6 +24,7 @@
       <Isolated>false</Isolated>
       <EmbedInteropTypes>true</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GIS.Framework\GIS.Framework.csproj" />
