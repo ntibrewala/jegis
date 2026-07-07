@@ -10,6 +10,7 @@ namespace GIS.Framework
         {
             try
             {
+                Helpers.LoggerHelper.Log("Entered EWayBillEngine.ProcessEWayBill");
                 Helpers.LoggerHelper.Log($"--- STARTING STANDALONE E-WAY BILL PROCESS FOR DOC: {docEntry} (ObjType: {objType}) ---");
 
                 // PRE-VALIDATION: Check if an active E-Way Bill already exists
@@ -61,11 +62,13 @@ namespace GIS.Framework
                 responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiResponse);
 
                 Helpers.LoggerHelper.Log($"--- COMPLETED STANDALONE E-WAY BILL PROCESS FOR DOC: {docEntry} ---");
+                Helpers.LoggerHelper.Log("Exited EWayBillEngine.ProcessEWayBill");
                 return apiResponse;
             }
             catch (Exception ex)
             {
                 Helpers.LoggerHelper.Log($"CRITICAL ENGINE FAILURE: {ex.Message}");
+                Helpers.LoggerHelper.Log("Exited EWayBillEngine.ProcessEWayBill (with Exception)");
                 throw;
             }
         }

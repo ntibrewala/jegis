@@ -11,6 +11,7 @@ namespace GIS.Framework.Helpers
     {
         public static int GetDistanceWithCache(IDatabaseHelper dbHelper, DataRow row)
         {
+            LoggerHelper.Log("Entered DistanceHelper.GetDistanceWithCache");
             int transDist = 0;
             if (row.Table.Columns.Contains("transDistance") && row["transDistance"] != DBNull.Value && !string.IsNullOrEmpty(row["transDistance"].ToString()))
             {
@@ -42,10 +43,12 @@ namespace GIS.Framework.Helpers
                 }
                 else
                 {
+                    LoggerHelper.Log("Exited DistanceHelper.GetDistanceWithCache (with Exception)");
                     throw new Exception($"MISSING_DISTANCE|{routeHash}|{fromAddr}|{toAddr}");
                 }
             }
 
+            LoggerHelper.Log("Exited DistanceHelper.GetDistanceWithCache");
             return transDist;
         }
     }

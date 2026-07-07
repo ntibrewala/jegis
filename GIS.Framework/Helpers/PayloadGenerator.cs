@@ -10,6 +10,7 @@ namespace GIS.Framework.Helpers
     {
         public static Tuple<string, string> GenerateEInvoicePayload(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
+            LoggerHelper.Log("Entered PayloadGenerator.GenerateEInvoicePayload");
             LoggerHelper.Log($"Starting Standalone E-Invoice Payload Generation for ObjType: {objType}, DocEntry: {docEntry}...");
 
             string headerQuery = $"CALL \"GIS_EInvoice_Get_GenInvoiceDet_Split\"('{objType}','{docEntry}','Addon','Header')";
@@ -33,11 +34,13 @@ namespace GIS.Framework.Helpers
             // Extract the Target URL directly from the database response
             string targetUrl = headerTable.Rows[0].Table.Columns.Contains("URL") ? headerTable.Rows[0]["URL"].ToString().Trim() : "https://gstsandbox.charteredinfo.com/eicore/dec/v1.03/Invoice";
 
+            LoggerHelper.Log("Exited PayloadGenerator.GenerateEInvoicePayload");
             return new Tuple<string, string>(jsonPayload, targetUrl);
         }
 
         public static Tuple<string, string> GenerateCombinedPayload(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
+            LoggerHelper.Log("Entered PayloadGenerator.GenerateCombinedPayload");
             LoggerHelper.Log($"Starting Combined Payload Generation for ObjType: {objType}, DocEntry: {docEntry}...");
 
             string headerQuery = $"CALL \"GIS_EInvoice_Get_GenInvoiceDet_Split\"('{objType}','{docEntry}','Addon','Header')";
@@ -93,11 +96,13 @@ namespace GIS.Framework.Helpers
             // Extract the Target URL directly from the database response!
             string targetUrl = headerTable.Rows[0].Table.Columns.Contains("URL") ? headerTable.Rows[0]["URL"].ToString().Trim() : "https://gstsandbox.charteredinfo.com/eicore/dec/v1.03/Invoice";
 
+            LoggerHelper.Log("Exited PayloadGenerator.GenerateCombinedPayload");
             return new Tuple<string, string>(jsonPayload, targetUrl);
         }
 
         public static Tuple<string, string> GenerateEWayBillPayload(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
+            LoggerHelper.Log("Entered PayloadGenerator.GenerateEWayBillPayload");
             LoggerHelper.Log($"Starting Standalone E-Way Bill Payload Generation for ObjType: {objType}, DocEntry: {docEntry}...");
 
             string sDocType = (objType == "13") ? "Invoice" : (objType == "14" ? "CreditMemo" : objType);
@@ -222,11 +227,13 @@ namespace GIS.Framework.Helpers
 
             if (string.IsNullOrEmpty(targetUrl)) throw new Exception("Target URL missing from database response.");
 
+            LoggerHelper.Log("Exited PayloadGenerator.GenerateEWayBillPayload");
             return new Tuple<string, string>(jsonPayload, targetUrl);
         }
 
         public static Tuple<string, string> GenerateEWayBillCancelPayload(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
+            LoggerHelper.Log("Entered PayloadGenerator.GenerateEWayBillCancelPayload");
             LoggerHelper.Log($"Starting E-Way Bill Cancel Payload Generation for ObjType: {objType}, DocEntry: {docEntry}...");
 
             string tableName = (objType == "13") ? "OINV" : (objType == "14") ? "ORIN" : "OWTR";
@@ -278,6 +285,7 @@ namespace GIS.Framework.Helpers
             
             if (string.IsNullOrEmpty(targetUrl)) throw new Exception("Target URL for CancelEWay missing.");
 
+            LoggerHelper.Log("Exited PayloadGenerator.GenerateEWayBillCancelPayload");
             return new Tuple<string, string>(jsonPayload, targetUrl);
         }
     }

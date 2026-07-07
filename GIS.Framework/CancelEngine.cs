@@ -12,6 +12,7 @@ namespace GIS.Framework
         {
             try
             {
+                LoggerHelper.Log("Entered CancelEngine.ProcessCancel");
                 LoggerHelper.Log($"--- STARTING CANCEL PROCESS FOR DOC: {docEntry} ---");
 
                 // Step 1: Check if the document was previously generated and get its IRN
@@ -74,11 +75,13 @@ namespace GIS.Framework
                 CancelResponseHandler.RouteCancelResponse(dbHelper, objType, docEntry, jsonPayload, apiResponse);
 
                 LoggerHelper.Log($"--- COMPLETED CANCEL PROCESS FOR DOC: {docEntry} ---");
+                LoggerHelper.Log("Exited CancelEngine.ProcessCancel");
                 return apiResponse;
             }
             catch (Exception ex)
             {
                 LoggerHelper.Log($"CRITICAL CANCEL ENGINE FAILURE: {ex.Message}");
+                LoggerHelper.Log("Exited CancelEngine.ProcessCancel (with Exception)");
                 throw;
             }
         }

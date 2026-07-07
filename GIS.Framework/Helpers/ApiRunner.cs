@@ -11,6 +11,7 @@ namespace GIS.Framework.Helpers
 
         public static string PostInvoice(string jsonPayload, string authToken, string gstin, string userName, string password, string aspId, string targetUrl)
         {
+            LoggerHelper.Log("Entered ApiRunner.PostInvoice");
             LoggerHelper.Log($"Starting API call to CharteredInfo POST endpoint: {targetUrl}...");
             var request = new HttpRequestMessage(HttpMethod.Post, targetUrl);
 
@@ -32,17 +33,20 @@ namespace GIS.Framework.Helpers
                 LoggerHelper.Log($"API Response StatusCode: {(int)response.StatusCode}");
                 LoggerHelper.Log($"API Response Body: {responseBody}");
 
+                LoggerHelper.Log("Exited ApiRunner.PostInvoice");
                 return responseBody;
             }
             catch (Exception ex)
             {
                 LoggerHelper.Log($"Critical Error during API call: {ex.Message}");
+                LoggerHelper.Log("Exited ApiRunner.PostInvoice (with Exception)");
                 throw;
             }
         }
 
         public static string PostCancelInvoice(string jsonPayload, string authToken, string gstin, string userName, string password, string aspId, string targetUrl)
         {
+            LoggerHelper.Log("Entered ApiRunner.PostCancelInvoice");
             LoggerHelper.Log($"Starting API call to CharteredInfo Cancel endpoint: {targetUrl}...");
             var request = new HttpRequestMessage(HttpMethod.Post, targetUrl);
 
@@ -64,11 +68,13 @@ namespace GIS.Framework.Helpers
                 LoggerHelper.Log($"API Response StatusCode: {(int)response.StatusCode}");
                 LoggerHelper.Log($"API Response Body: {responseBody}");
 
+                LoggerHelper.Log("Exited ApiRunner.PostCancelInvoice");
                 return responseBody;
             }
             catch (Exception ex)
             {
                 LoggerHelper.Log($"Critical Error during Cancel API call: {ex.Message}");
+                LoggerHelper.Log("Exited ApiRunner.PostCancelInvoice (with Exception)");
                 throw;
             }
         }

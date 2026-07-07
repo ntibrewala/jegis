@@ -10,6 +10,7 @@ namespace GIS.Framework
         {
             try
             {
+                Helpers.LoggerHelper.Log("Entered CombinedEngine.ProcessCombined");
                 Helpers.LoggerHelper.Log($"--- STARTING COMBINED PROCESS FOR DOC: {docEntry} ---");
 
                 // PRE-VALIDATION: Check E-Invoice & E-Way Bill existence
@@ -75,11 +76,13 @@ namespace GIS.Framework
                 Helpers.ResponseHandler.RouteResponse("combined", dbHelper, objType, docEntry, jsonPayload, apiResponse);
 
                 Helpers.LoggerHelper.Log($"--- COMPLETED COMBINED PROCESS FOR DOC: {docEntry} ---");
+                Helpers.LoggerHelper.Log("Exited CombinedEngine.ProcessCombined");
                 return apiResponse;
             }
             catch (Exception ex)
             {
                 Helpers.LoggerHelper.Log($"CRITICAL ENGINE FAILURE: {ex.Message}");
+                Helpers.LoggerHelper.Log("Exited CombinedEngine.ProcessCombined (with Exception)");
                 throw;
             }
         }

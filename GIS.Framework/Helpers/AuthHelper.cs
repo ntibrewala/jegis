@@ -14,6 +14,7 @@ namespace GIS.Framework.Helpers
     {
         public static async Task<TokenResponse> GetCharteredAuthTokenAsync(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
+            LoggerHelper.Log("Entered AuthHelper.GetCharteredAuthTokenAsync");
             LoggerHelper.Log($"Starting CharteredAuthToken fetch process for ObjType: {objType}, DocEntry: {docEntry}...");
             
             // 1. Fetch Credentials & Check Cache
@@ -36,6 +37,7 @@ namespace GIS.Framework.Helpers
             if (isTokenValid)
             {
                 LoggerHelper.Log($"Found valid, unexpired AuthToken in database cache for GSTIN {credentials.GSTIN}. Skipping HTTP API call.");
+                LoggerHelper.Log("Exited AuthHelper.GetCharteredAuthTokenAsync");
                 return new TokenResponse 
                 { 
                     Status = 1, 
@@ -103,10 +105,12 @@ namespace GIS.Framework.Helpers
                     tokenResponse.Data = new TokenData { AuthToken = newToken, TokenExpiry = calculatedExpiry };
                 }
                 
+                LoggerHelper.Log("Exited AuthHelper.GetCharteredAuthTokenAsync");
                 return tokenResponse;
             }
             else
             {
+                LoggerHelper.Log("Exited AuthHelper.GetCharteredAuthTokenAsync (with Exception)");
                 throw new Exception($"Auth API Error: {tokenResponse.error?.message ?? tokenResponse.ErrorDetails ?? "Unknown Error or Missing Token"}");
             }
         }

@@ -7,6 +7,7 @@ namespace GIS.Framework.Helpers
     {
         public static void RouteResponse(string actionType, IDatabaseHelper dbHelper, string objType, string docEntry, string rawJsonRequest, string rawJsonResponse)
         {
+            LoggerHelper.Log("Entered ResponseHandler.RouteResponse");
             LoggerHelper.Log($"Routing Response for Action Type: {actionType}");
             
             IResponseHandler handler;
@@ -23,6 +24,7 @@ namespace GIS.Framework.Helpers
 
             // Delegate to the specific sub-handler
             handler.Handle(dbHelper, objType, docEntry, rawJsonRequest, rawJsonResponse);
+            LoggerHelper.Log("Exited ResponseHandler.RouteResponse");
         }
     }
 }
