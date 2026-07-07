@@ -107,8 +107,6 @@ namespace GIS.Framework.Helpers
 
                             // Update SAP Document - ONLY use columns that exist on OINV
                             string updateQuery = $"UPDATE \"{tableName}\" SET \"Comments\"='SUCCESS', \"U_IRN\"='{irn}'";
-                            if (!string.IsNullOrEmpty(ackNo)) updateQuery += $", \"U_AckNo\"='{ackNo}'";
-                            if (!string.IsNullOrEmpty(ackDt)) updateQuery += $", \"U_AckDt\"='{ackDt}'";
                             if (!string.IsNullOrEmpty(ewbNo)) updateQuery += $", \"U_ewayBNo\"='{ewbNo}'";
                             if (!string.IsNullOrEmpty(ewbValidTill)) updateQuery += $", \"U_EwayVal\"='{ewbValidTill}'";
                             if (!string.IsNullOrEmpty(ewbDt)) updateQuery += $", \"U_ewayBDa\"='{ewbDt}'";

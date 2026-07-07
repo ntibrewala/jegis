@@ -58,7 +58,7 @@ namespace GIS.Framework.Helpers
             // Fetch E-Way Bill Details from the dedicated E-Way Bill SP
             try
             {
-                string sDocType = (objType == "13") ? "Invoice" : (objType == "14" ? "CreditMemo" : objType);
+                string sDocType = (objType == "13" || objType == "IN") ? "Invoice" : (objType == "14" ? "CreditMemo" : objType);
                 string ewbQuery = $"CALL \"GIS_EwayBill_GetPostDet\"('{docEntry}', '', '', '', '', '', '', '', '', '', '{sDocType}', 'Header')";
                 DataTable ewbTable = dbHelper.ExecuteQuery(ewbQuery);
 
