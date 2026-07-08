@@ -37,7 +37,7 @@ namespace GIS.Framework.Helpers
                 // In production, failing to log should ideally not crash the main thread.
                 try 
                 { 
-                    File.AppendAllText(@"C:\GIS_Log_Error.txt", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Failed to write log to {LOG_DIRECTORY}: {ex.Message}{Environment.NewLine}"); 
+                    File.AppendAllText(Path.Combine(Path.GetTempPath(), "GIS_Log_Error.txt"), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Failed to write log to {LOG_DIRECTORY}: {ex.Message}{Environment.NewLine}"); 
                 } 
                 catch { }
             }
