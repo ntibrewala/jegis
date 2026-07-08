@@ -8,8 +8,8 @@ namespace GIS.Framework.Helpers
     /// </summary>
     public static class LoggerHelper
     {
-        // Target log directory changed to ProgramData to avoid any D:\ drive or User permission issues
-        private const string LOG_DIRECTORY = @"C:\ProgramData\GIS_Logs";
+        // Target log directory specifically requested for this environment
+        private const string LOG_DIRECTORY = @"D:\BHV\CLogs\GIS";
         
         public static void Log(string message)
         {
