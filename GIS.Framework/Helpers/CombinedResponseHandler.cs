@@ -121,7 +121,7 @@ namespace GIS.Framework.Helpers
                             var dt = dbHelper.ExecuteQuery(checkExist);
                             if (dt != null && dt.Rows.Count > 0)
                             {
-                                string updateOres = $"UPDATE \"GIS_EI_ORES\" SET \"ResponseMessage\"='SUCCESS', \"Status\"='ACT', \"AckNo\"='{ackNo}', \"AckDt\"='{ackDt}', \"Irn\"='{irn}', \"EncryptedSignedInvoice\"='{signedInvoice}', \"EncryptedSignedQRCode\"='{signedQRCode}', \"IsCancel\"='', \"ResponseCode\"='1', \"RandomNo\"='', \"QRCodeImage\"=''";
+                                string updateOres = $"UPDATE \"GIS_EI_ORES\" SET \"ResponseMessage\"='SUCCESS', \"Status\"='ACT', \"AckNo\"='{ackNo}', \"AckDt\"='{ackDt}', \"Irn\"='{irn}', \"EncryptedSignedInvoice\"='', \"EncryptedSignedQRCode\"='{signedQRCode}', \"IsCancel\"='', \"ResponseCode\"='1', \"RandomNo\"='', \"QRCodeImage\"=''";
                                 if (!string.IsNullOrEmpty(ewbNo)) updateOres += $", \"EwbNo\"='{ewbNo}'";
                                 if (!string.IsNullOrEmpty(ewbDt)) updateOres += $", \"EwbDt\"='{ewbDt}'";
                                 if (!string.IsNullOrEmpty(ewbValidTill)) updateOres += $", \"EwbValidTill\"='{ewbValidTill}'";
@@ -131,7 +131,7 @@ namespace GIS.Framework.Helpers
                             }
                             else
                             {
-                                string insertOres = $"INSERT INTO \"GIS_EI_ORES\" (\"DocEntry\", \"ObjType\", \"ResponseMessage\", \"Status\", \"AckNo\", \"AckDt\", \"Irn\", \"EncryptedSignedInvoice\", \"EncryptedSignedQRCode\", \"IsCancel\", \"ResponseCode\", \"RandomNo\", \"QRCodeImage\", \"EwbNo\", \"EwbDt\", \"EwbValidTill\") VALUES ('{docEntry}', '{sDocType}', 'SUCCESS', 'ACT', '{ackNo}', '{ackDt}', '{irn}', '{signedInvoice}', '{signedQRCode}', '', '1', '', '', '{ewbNo}', '{ewbDt}', '{ewbValidTill}')";
+                                string insertOres = $"INSERT INTO \"GIS_EI_ORES\" (\"DocEntry\", \"ObjType\", \"ResponseMessage\", \"Status\", \"AckNo\", \"AckDt\", \"Irn\", \"EncryptedSignedInvoice\", \"EncryptedSignedQRCode\", \"IsCancel\", \"ResponseCode\", \"RandomNo\", \"QRCodeImage\", \"EwbNo\", \"EwbDt\", \"EwbValidTill\") VALUES ('{docEntry}', '{sDocType}', 'SUCCESS', 'ACT', '{ackNo}', '{ackDt}', '{irn}', '', '{signedQRCode}', '', '1', '', '', '{ewbNo}', '{ewbDt}', '{ewbValidTill}')";
                                 dbHelper.ExecuteNonQuery(insertOres);
                                 LoggerHelper.Log($"Successfully inserted record into GIS_EI_ORES for DocEntry {docEntry}.");
                             }
