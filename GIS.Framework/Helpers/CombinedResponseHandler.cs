@@ -15,8 +15,8 @@ namespace GIS.Framework.Helpers
             {
                 string safeRequest = rawJsonRequest?.Replace("'", "''") ?? "";
                 string safeResponse = rawJsonResponse?.Replace("'", "''") ?? "";
-                string sDocTypeLog = (objType == "13") ? "IN" : (objType == "14" ? "CM" : objType);
-                string sDocType = (objType == "13") ? "13" : (objType == "14" ? "14" : "Unknown");
+                string sDocTypeLog = (objType == "13" || objType == "IN") ? "IN" : (objType == "14" || objType == "CM" ? "CM" : objType);
+                string sDocType = (objType == "13" || objType == "IN") ? "13" : (objType == "14" || objType == "CM" ? "14" : "Unknown");
 
                 // 1. Insert into TEC_EI_LOG (Legacy Logging)
                 string logQuery = $"INSERT INTO \"TEC_EI_LOG\" VALUES('{docEntry}', '{sDocTypeLog}', '{safeRequest}', '{safeResponse}', CURRENT_TIMESTAMP, 'Addon')";
@@ -83,7 +83,7 @@ namespace GIS.Framework.Helpers
 
                         if (isSuccess && !string.IsNullOrEmpty(irn))
                         {
-                            string tableName = (objType == "13") ? "OINV" : (objType == "14" ? "ORIN" : "OWTR");
+                            string tableName = (sDocType == "13") ? "OINV" : (sDocType == "14" ? "ORIN" : "OWTR");
 
                             // Fetch Distance from InfoDtls if present
                             string distance = "";
