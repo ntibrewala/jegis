@@ -10,6 +10,11 @@ namespace GIS.Framework.Helpers
     {
         // Target log directory specifically requested for this environment
         private const string LOG_DIRECTORY = @"D:\BHV\CLogs\GIS";
+
+        /// <summary>
+        /// Stores the last file I/O error so it can be reported via database when file logging fails.
+        /// </summary>
+        public static string LastError { get; private set; } = "";
         
         public static void Log(string message)
         {
@@ -34,10 +39,11 @@ namespace GIS.Framework.Helpers
             }
             catch (Exception ex)
             {
+                LastError = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] LOG_DIRECTORY={LOG_DIRECTORY}, finalPath attempted, Error: {ex.ToString()}";
                 // In production, failing to log should ideally not crash the main thread.
                 try 
                 { 
-                    File.AppendAllText(@"C:\ProgramData\GIS_Log_Error.txt", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Failed to write log to {LOG_DIRECTORY}: {ex.Message}{Environment.NewLine}"); 
+                    File.AppendAllText(@"C:\ProgramData\GIS_Log_Error.txt", LastError + Environment.NewLine); 
                 } 
                 catch { }
             }

@@ -13,6 +13,17 @@ namespace GIS.Framework
                 Helpers.LoggerHelper.Log("Entered CombinedEngine.ProcessCombined");
                 Helpers.LoggerHelper.Log($"--- STARTING COMBINED PROCESS FOR DOC: {docEntry} ---");
 
+                // DIAGNOSTIC: If file logging silently failed, write the error to the database so we can see it
+                if (!string.IsNullOrEmpty(Helpers.LoggerHelper.LastError))
+                {
+                    try
+                    {
+                        string safeError = Helpers.LoggerHelper.LastError.Replace("'", "''");
+                        dbHelper.ExecuteNonQuery($"INSERT INTO \"TEC_EI_LOG\" VALUES('{docEntry}', 'DIAG', 'LOG_ERROR_DIAGNOSTIC', '{safeError}', CURRENT_TIMESTAMP, 'Addon')");
+                    }
+                    catch { }
+                }
+
                 // PRE-VALIDATION: Check E-Invoice & E-Way Bill existence
                 string docType = (objType == "13") ? "13" : "14";
                 string tableName = (objType == "13") ? "OINV" : "ORIN";
