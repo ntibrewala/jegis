@@ -8,3 +8,4 @@ PayloadTester/
 
 # Ignore Python Test Scripts
 PythonScripts/
+.vs/
