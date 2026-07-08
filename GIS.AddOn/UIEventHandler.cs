@@ -113,7 +113,6 @@ namespace GIS.AddOn
 
                         if (actionName == "Generate Combined")
                         {
-                            _connectionManager.SboApplication.MessageBox("HELLO FROM THE NEW C# ADD-ON! If you see this, the latest code is successfully running!");
                             LoggerHelper.Log($"GIS ButtonCombo Selected! Initializing Combined Generation for DocEntry: {docEntry}...");
                             var dbHelper = new DatabaseHelper(_connectionManager.Company);
                             _connectionManager.SboApplication.StatusBar.SetText("Generating E-Invoice, please wait...", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
