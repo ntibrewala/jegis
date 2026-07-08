@@ -8,8 +8,8 @@ namespace GIS.Framework.Helpers
     /// </summary>
     public static class LoggerHelper
     {
-        // Target log directory specifically requested for this environment
-        private const string LOG_DIRECTORY = @"D:\BHV\CLogs\GIS";
+        // Target log directory changed to ProgramData to avoid any D:\ drive or User permission issues
+        private const string LOG_DIRECTORY = @"C:\ProgramData\GIS_Logs";
         
         public static void Log(string message)
         {
@@ -37,7 +37,7 @@ namespace GIS.Framework.Helpers
                 // In production, failing to log should ideally not crash the main thread.
                 try 
                 { 
-                    File.AppendAllText(Path.Combine(Path.GetTempPath(), "GIS_Log_Error.txt"), $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Failed to write log to {LOG_DIRECTORY}: {ex.Message}{Environment.NewLine}"); 
+                    File.AppendAllText(@"C:\ProgramData\GIS_Log_Error.txt", $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Failed to write log to {LOG_DIRECTORY}: {ex.Message}{Environment.NewLine}"); 
                 } 
                 catch { }
             }
