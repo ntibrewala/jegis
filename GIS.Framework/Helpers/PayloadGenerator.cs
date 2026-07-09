@@ -69,7 +69,7 @@ namespace GIS.Framework.Helpers
                     {
                         string transId = ewbRow.Table.Columns.Contains("transporterId") ? ewbRow["transporterId"].ToString().Trim() : null;
                         string transName = ewbRow.Table.Columns.Contains("transporterName") ? ewbRow["transporterName"].ToString().Trim() : null;
-                        string transMode = ewbRow.Table.Columns.Contains("transMode") ? ewbRow["transMode"].ToString().Trim() : null;
+                        string transMode = ewbRow.Table.Columns.Contains("U_TransMode") && !string.IsNullOrEmpty(ewbRow["U_TransMode"].ToString().Trim()) ? ewbRow["U_TransMode"].ToString().Trim() : (ewbRow.Table.Columns.Contains("transMode") ? ewbRow["transMode"].ToString().Trim() : null);
                         string transDocNo = ewbRow.Table.Columns.Contains("transDocNo") ? ewbRow["transDocNo"].ToString().Trim() : null;
                         string transDocDt = ewbRow.Table.Columns.Contains("transDocDate") ? ewbRow["transDocDate"].ToString().Trim() : null;
                         string vehNo = ewbRow.Table.Columns.Contains("vehicleNo") ? ewbRow["vehicleNo"].ToString().Trim() : null;
@@ -91,6 +91,7 @@ namespace GIS.Framework.Helpers
             }
             catch (Exception ex)
             {
+                if (ex.Message.StartsWith("MISSING_DISTANCE|")) throw;
                 LoggerHelper.Log("Warning: Failed to fetch E-Way Bill details, omitting EwbDetails from payload. " + ex.Message);
             }
 
@@ -146,18 +147,23 @@ namespace GIS.Framework.Helpers
                 {
                     string val = hRow[colName].ToString().Trim();
                     // Basic numeric type conversions for proper JSON
-                    if (colName == "transDistance" || colName.Contains("Pincode") || colName.Contains("StateCode") || colName == "transactionType" || colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase) || colName == "transMode" || colName == "subSupplyType")
+                    if (colName == "transDistance" || colName.Contains("Pincode") || colName.Contains("StateCode") || colName == "transactionType" || colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase) || colName == "transMode" || colName.Equals("U_TransMode", StringComparison.OrdinalIgnoreCase) || colName == "subSupplyType")
                     {
                         if (int.TryParse(val, out int num)) 
                         {
-                            if (colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase))
+                            if (colName == "transDistance" && num == 0)
+                                payload[colName] = DistanceHelper.GetDistanceWithCache(dbHelper, hRow);
+                            else if (colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase))
                                 payload["transactionType"] = num; // Remap case-sensitive UDF to strict JSON key
+                            else if (colName.Equals("U_TransMode", StringComparison.OrdinalIgnoreCase))
+                                payload["transMode"] = num.ToString(); // API expects transMode as string number
                             else
-                                payload[colName] = num;
+                                payload[colName] = colName == "transMode" ? num.ToString() : (object)num;
                         }
                         else 
                         {
                             if (colName == "transactionType" || colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase)) payload["transactionType"] = 1; // Default transaction type
+                            else if (colName == "transMode" || colName.Equals("U_TransMode", StringComparison.OrdinalIgnoreCase)) payload["transMode"] = "1"; // Default transMode
                             else if (colName == "transDistance") payload[colName] = DistanceHelper.GetDistanceWithCache(dbHelper, hRow); // Check cache
                             else if (string.IsNullOrEmpty(val)) { /* Omit completely from Dictionary to avoid 'Invalid Json' */ }
                             else payload[colName] = val; // Fallback
