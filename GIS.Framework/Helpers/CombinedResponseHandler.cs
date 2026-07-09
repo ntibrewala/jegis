@@ -85,12 +85,29 @@ namespace GIS.Framework.Helpers
                         {
                             string tableName = (sDocType == "13") ? "OINV" : (sDocType == "14" ? "ORIN" : "OWTR");
 
-                            // Fetch Distance from original payload so we don't accidentally parse warning messages
                             string distance = "";
                             try
                             {
                                 var reqObj = Newtonsoft.Json.Linq.JObject.Parse(rawJsonRequest);
                                 distance = reqObj["EwbDtls"]?["Distance"]?.ToString();
+                                
+                                // If we sent 0 (or null), NIC will auto-calculate and return it in a warning alert.
+                                if (string.IsNullOrEmpty(distance) || distance == "0")
+                                {
+                                    var infoDtls = jObj["InfoDtls"] as Newtonsoft.Json.Linq.JArray;
+                                    if (infoDtls != null)
+                                    {
+                                        foreach (var info in infoDtls)
+                                        {
+                                            if (info["InfCd"]?.ToString() == "EWBPPD" || info["InfCd"]?.ToString() == "103")
+                                            {
+                                                string desc = info["Desc"]?.ToString() ?? "";
+                                                var match = System.Text.RegularExpressions.Regex.Match(desc, @"\d+");
+                                                if (match.Success) distance = match.Value;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             catch { }
 

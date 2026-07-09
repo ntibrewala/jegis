@@ -59,6 +59,16 @@ namespace GIS.Framework.Helpers
                 {
                     var reqObj = Newtonsoft.Json.Linq.JObject.Parse(payload);
                     distance = reqObj["transDistance"]?.ToString();
+                    
+                    if (string.IsNullOrEmpty(distance) || distance == "0")
+                    {
+                        string alert = jObj["alert"]?.ToString() ?? "";
+                        if (!string.IsNullOrEmpty(alert))
+                        {
+                            var match = System.Text.RegularExpressions.Regex.Match(alert, @"\d+");
+                            if (match.Success) distance = match.Value;
+                        }
+                    }
                 }
                 catch { }
                 
