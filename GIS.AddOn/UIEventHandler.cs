@@ -478,27 +478,39 @@ namespace GIS.AddOn
 
         private string ShowInputDialog(string text, string caption)
         {
-            System.Windows.Forms.Form prompt = new System.Windows.Forms.Form()
+            string result = "";
+            System.Threading.Thread t = new System.Threading.Thread(() =>
             {
-                Width = 450,
-                Height = 280,
-                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
-                Text = caption,
-                StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen,
-                TopMost = true, // Forces window to be above SAP
-                MaximizeBox = false,
-                MinimizeBox = false
-            };
-            System.Windows.Forms.Label textLabel = new System.Windows.Forms.Label() { Left = 20, Top = 20, Width = 400, Height = 120, Text = text, Font = new System.Drawing.Font("Arial", 10) };
-            System.Windows.Forms.TextBox textBox = new System.Windows.Forms.TextBox() { Left = 20, Top = 150, Width = 400, Font = new System.Drawing.Font("Arial", 12), Text = "15" };
-            System.Windows.Forms.Button confirmation = new System.Windows.Forms.Button() { Text = "OK", Left = 320, Width = 100, Top = 190, DialogResult = System.Windows.Forms.DialogResult.OK };
-            confirmation.Click += (sender, e) => { prompt.Close(); };
-            prompt.Controls.Add(textBox);
-            prompt.Controls.Add(confirmation);
-            prompt.Controls.Add(textLabel);
-            prompt.AcceptButton = confirmation;
+                System.Windows.Forms.Form prompt = new System.Windows.Forms.Form()
+                {
+                    Width = 450,
+                    Height = 280,
+                    FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
+                    Text = caption,
+                    StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen,
+                    TopMost = true, // Forces window to be above SAP
+                    MaximizeBox = false,
+                    MinimizeBox = false
+                };
+                System.Windows.Forms.Label textLabel = new System.Windows.Forms.Label() { Left = 20, Top = 20, Width = 400, Height = 120, Text = text, Font = new System.Drawing.Font("Arial", 10) };
+                System.Windows.Forms.TextBox textBox = new System.Windows.Forms.TextBox() { Left = 20, Top = 150, Width = 400, Font = new System.Drawing.Font("Arial", 12), Text = "15" };
+                System.Windows.Forms.Button confirmation = new System.Windows.Forms.Button() { Text = "OK", Left = 320, Width = 100, Top = 190, DialogResult = System.Windows.Forms.DialogResult.OK };
+                confirmation.Click += (sender, e) => { prompt.Close(); };
+                prompt.Controls.Add(textBox);
+                prompt.Controls.Add(confirmation);
+                prompt.Controls.Add(textLabel);
+                prompt.AcceptButton = confirmation;
 
-            return prompt.ShowDialog() == System.Windows.Forms.DialogResult.OK ? textBox.Text : "";
+                if (prompt.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    result = textBox.Text;
+                }
+            });
+            t.SetApartmentState(System.Threading.ApartmentState.STA);
+            t.Start();
+            t.Join(); // Wait for the user to close the form
+
+            return result;
         }
     }
 }
