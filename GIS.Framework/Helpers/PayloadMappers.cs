@@ -29,6 +29,8 @@ namespace GIS.Framework.Helpers
         public static EInvoicePayload MapHeader(DataRow headerRow)
         {
             string ecm = GetString(headerRow, "EcmGstin");
+            string transType = GetString(headerRow, "transactionType") ?? "1";
+
             var payload = new EInvoicePayload
             {
                 Version = "1.1",
@@ -73,7 +75,7 @@ namespace GIS.Framework.Helpers
                     Phone = GetString(headerRow, "Buyer_Ph"),
                     Email = GetString(headerRow, "Buyer_Em")
                 },
-                DispatchDetails = GetString(headerRow, "Disp_Dtl_Nm") != null || GetString(headerRow, "Disp_Dtl_Addr1") != null ? new PartyDetails
+                DispatchDetails = (transType == "3" || transType == "4") && (GetString(headerRow, "Disp_Dtl_Nm") != null || GetString(headerRow, "Disp_Dtl_Addr1") != null) ? new PartyDetails
                 {
                     LegalName = GetString(headerRow, "Disp_Dtl_Nm"),
                     TradeName = GetString(headerRow, "Disp_Dtl_Nm"),
@@ -83,7 +85,7 @@ namespace GIS.Framework.Helpers
                     Pincode = GetString(headerRow, "Disp_Dtl_Pin") != null ? Convert.ToInt32(GetString(headerRow, "Disp_Dtl_Pin")) : 0,
                     StateCode_Address = GetString(headerRow, "Disp_Dtl_Stcd")
                 } : null,
-                ShippingDetails = GetString(headerRow, "ShipDtls_GSTIN") != null ? new PartyDetails
+                ShippingDetails = (transType == "2" || transType == "4") && GetString(headerRow, "ShipDtls_GSTIN") != null ? new PartyDetails
                 {
                     Gstin = GetString(headerRow, "ShipDtls_GSTIN"),
                     LegalName = GetString(headerRow, "ShipDtls_LglNm"),
