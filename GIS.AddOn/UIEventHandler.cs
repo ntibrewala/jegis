@@ -447,7 +447,7 @@ namespace GIS.AddOn
                         string toAddr = parts[3];
                         
                         string promptMsg = $"Local Route Detected (Same Pincodes).\nPlease enter the exact distance in Kilometers between:\n\nFROM: {fromAddr}\nTO: {toAddr}";
-                        string inputDist = Microsoft.VisualBasic.Interaction.InputBox(promptMsg, "Distance Required", "15");
+                        string inputDist = ShowInputDialog(promptMsg, "Distance Required");
                         
                         if (!string.IsNullOrEmpty(inputDist) && int.TryParse(inputDist, out int dist))
                         {
@@ -474,6 +474,31 @@ namespace GIS.AddOn
                     _connectionManager?.SboApplication?.StatusBar?.SetText($"Error: {ex.Message}", SAPbouiCOM.BoMessageTime.bmt_Short, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
                 }
             }
+        }
+
+        private string ShowInputDialog(string text, string caption)
+        {
+            System.Windows.Forms.Form prompt = new System.Windows.Forms.Form()
+            {
+                Width = 450,
+                Height = 280,
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
+                Text = caption,
+                StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen,
+                TopMost = true, // Forces window to be above SAP
+                MaximizeBox = false,
+                MinimizeBox = false
+            };
+            System.Windows.Forms.Label textLabel = new System.Windows.Forms.Label() { Left = 20, Top = 20, Width = 400, Height = 120, Text = text, Font = new System.Drawing.Font("Arial", 10) };
+            System.Windows.Forms.TextBox textBox = new System.Windows.Forms.TextBox() { Left = 20, Top = 150, Width = 400, Font = new System.Drawing.Font("Arial", 12), Text = "15" };
+            System.Windows.Forms.Button confirmation = new System.Windows.Forms.Button() { Text = "OK", Left = 320, Width = 100, Top = 190, DialogResult = System.Windows.Forms.DialogResult.OK };
+            confirmation.Click += (sender, e) => { prompt.Close(); };
+            prompt.Controls.Add(textBox);
+            prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(textLabel);
+            prompt.AcceptButton = confirmation;
+
+            return prompt.ShowDialog() == System.Windows.Forms.DialogResult.OK ? textBox.Text : "";
         }
     }
 }
