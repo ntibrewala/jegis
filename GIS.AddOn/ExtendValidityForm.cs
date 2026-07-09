@@ -388,7 +388,7 @@ namespace GIS.AddOn
                             
                             parentForm.Items.Item("1").Click(SAPbouiCOM.BoCellClickType.ct_Regular);
                         }
-                        catch (Exception innerEx)
+                        catch (Exception)
                         {
                             string updateQ = $"UPDATE \"{tableName}\" SET \"U_VehicleNo\" = '{vehNo}', \"U_EwayVal\" = '{newValidUpto}' WHERE \"DocEntry\" = {sourceDocEntry}";
                             dbHelper.ExecuteNonQuery(updateQ);

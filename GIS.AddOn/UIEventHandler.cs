@@ -184,7 +184,7 @@ namespace GIS.AddOn
                             }
                             finally
                             {
-                                Helpers.ResponseHandler.RouteResponse("combined", dbHelper, objType, docEntry, jsonPayload, apiRes);
+                                GIS.Framework.Helpers.ResponseHandler.RouteResponse("combined", dbHelper, objType, docEntry, jsonPayload, apiRes);
                             }
                         }
                         else if (actionName == "Generate E-Invoice")
@@ -226,7 +226,7 @@ namespace GIS.AddOn
                             }
                             finally
                             {
-                                Helpers.IResponseHandler responseHandler = new Helpers.CombinedResponseHandler();
+                                GIS.Framework.Helpers.IResponseHandler responseHandler = new GIS.Framework.Helpers.CombinedResponseHandler();
                                 responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
                             }
                         }
@@ -267,7 +267,7 @@ namespace GIS.AddOn
                             }
                             finally
                             {
-                                Helpers.CancelResponseHandler.RouteCancelResponse(dbHelper, objType, docEntry, jsonPayload, apiRes);
+                                GIS.Framework.Helpers.CancelResponseHandler.RouteCancelResponse(dbHelper, objType, docEntry, jsonPayload, apiRes);
                             }
                         }
                         else if (actionName == "Generate E-Way Bill")
@@ -305,7 +305,7 @@ namespace GIS.AddOn
                             }
                             finally
                             {
-                                Helpers.IResponseHandler responseHandler = new Helpers.EWayBillResponseHandler();
+                                GIS.Framework.Helpers.IResponseHandler responseHandler = new GIS.Framework.Helpers.EWayBillResponseHandler();
                                 responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
                             }
                         }
@@ -344,7 +344,7 @@ namespace GIS.AddOn
                             }
                             finally
                             {
-                                Helpers.IResponseHandler responseHandler = new Helpers.EWayBillCancelResponseHandler();
+                                GIS.Framework.Helpers.IResponseHandler responseHandler = new GIS.Framework.Helpers.EWayBillCancelResponseHandler();
                                 responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
                             }
                         }
@@ -385,7 +385,7 @@ namespace GIS.AddOn
                             }
                             finally
                             {
-                                Helpers.IResponseHandler responseHandler = new Helpers.EWayBillResponseHandler();
+                                GIS.Framework.Helpers.IResponseHandler responseHandler = new GIS.Framework.Helpers.EWayBillResponseHandler();
                                 responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
                             }
                         }

@@ -273,7 +273,7 @@ namespace GIS.AddOn
                             
                             parentForm.Items.Item("1").Click(SAPbouiCOM.BoCellClickType.ct_Regular);
                         }
-                        catch (Exception innerEx)
+                        catch (Exception)
                         {
                             // Fallback to SQL update if the form was somehow closed
                             string updateQ = $"UPDATE \"{tableName}\" SET \"U_VehicleNo\" = '{vehNo}' WHERE \"DocEntry\" = {sourceDocEntry}";
