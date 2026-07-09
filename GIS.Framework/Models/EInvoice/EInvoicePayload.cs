@@ -21,7 +21,7 @@ namespace GIS.Framework.Models.EInvoice
         public PartyDetails BuyerDetails { get; set; }
 
         [JsonProperty("DispDtls", NullValueHandling = NullValueHandling.Ignore)]
-        public PartyDetails DispatchDetails { get; set; }
+        public DispatchDetails DispatchDetails { get; set; }
 
         [JsonProperty("ShipDtls", NullValueHandling = NullValueHandling.Ignore)]
         public PartyDetails ShippingDetails { get; set; }
