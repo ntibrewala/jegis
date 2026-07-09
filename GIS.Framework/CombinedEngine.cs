@@ -6,7 +6,7 @@ namespace GIS.Framework
 {
     public static class CombinedEngine
     {
-        public static string ProcessCombined(IDatabaseHelper dbHelper, string objType, string docEntry)
+        public static Tuple<string, string> ProcessCombined(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
             try
             {
@@ -83,12 +83,11 @@ namespace GIS.Framework
                 );
 
                 // Step 5: Write the response to SAP (OINV/ORIN) and log to TEC_EI_LOG
-                Helpers.LoggerHelper.Log("Executing Database Write-Back...");
-                Helpers.ResponseHandler.RouteResponse("combined", dbHelper, objType, docEntry, jsonPayload, apiResponse);
+                // DEFERRED: DB Write-Back will now be handled by UIEventHandler after showing Success Bar
 
                 Helpers.LoggerHelper.Log($"--- COMPLETED COMBINED PROCESS FOR DOC: {docEntry} ---");
                 Helpers.LoggerHelper.Log("Exited CombinedEngine.ProcessCombined");
-                return apiResponse;
+                return new Tuple<string, string>(jsonPayload, apiResponse);
             }
             catch (Exception ex)
             {

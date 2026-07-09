@@ -6,7 +6,7 @@ namespace GIS.Framework
 {
     public static class EWayBillEngine
     {
-        public static string ProcessEWayBill(IDatabaseHelper dbHelper, string objType, string docEntry)
+        public static Tuple<string, string> ProcessEWayBill(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
             try
             {
@@ -57,13 +57,11 @@ namespace GIS.Framework
                 );
 
                 // Step 5: Database Write-Back
-                Helpers.LoggerHelper.Log("Executing Database Write-Back...");
-                Helpers.IResponseHandler responseHandler = new Helpers.EWayBillResponseHandler();
-                responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiResponse);
+                // DEFERRED: DB Write-Back will now be handled by UIEventHandler after showing Success Bar
 
                 Helpers.LoggerHelper.Log($"--- COMPLETED STANDALONE E-WAY BILL PROCESS FOR DOC: {docEntry} ---");
                 Helpers.LoggerHelper.Log("Exited EWayBillEngine.ProcessEWayBill");
-                return apiResponse;
+                return new Tuple<string, string>(jsonPayload, apiResponse);
             }
             catch (Exception ex)
             {

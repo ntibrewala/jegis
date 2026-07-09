@@ -6,7 +6,7 @@ namespace GIS.Framework
 {
     public static class EInvoiceEngine
     {
-        public static string ProcessEInvoice(IDatabaseHelper dbHelper, string objType, string docEntry)
+        public static Tuple<string, string> ProcessEInvoice(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
             try
             {
@@ -52,12 +52,10 @@ namespace GIS.Framework
                 );
 
                 // Step 5: Database Write-Back
-                Helpers.LoggerHelper.Log("Executing Database Write-Back...");
-                Helpers.IResponseHandler responseHandler = new Helpers.CombinedResponseHandler();
-                responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiResponse);
+                // DEFERRED: DB Write-Back will now be handled by UIEventHandler after showing Success Bar
 
                 Helpers.LoggerHelper.Log($"--- COMPLETED STANDALONE E-INVOICE PROCESS FOR DOC: {docEntry} ---");
-                return apiResponse;
+                return new Tuple<string, string>(jsonPayload, apiResponse);
             }
             catch (Exception ex)
             {

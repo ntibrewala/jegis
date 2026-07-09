@@ -8,7 +8,7 @@ namespace GIS.Framework
 {
     public class CancelEngine
     {
-        public static string ProcessCancel(IDatabaseHelper dbHelper, string objType, string docEntry)
+        public static Tuple<string, string> ProcessCancel(IDatabaseHelper dbHelper, string objType, string docEntry)
         {
             try
             {
@@ -71,12 +71,11 @@ namespace GIS.Framework
                 );
 
                 // Step 5: Write the response to SAP (GIS_EI_ORES and OINV)
-                LoggerHelper.Log("Executing Database Write-Back for Cancellation...");
-                CancelResponseHandler.RouteCancelResponse(dbHelper, objType, docEntry, jsonPayload, apiResponse);
+                // DEFERRED: DB Write-Back will now be handled by UIEventHandler after showing Success Bar
 
                 LoggerHelper.Log($"--- COMPLETED CANCEL PROCESS FOR DOC: {docEntry} ---");
                 LoggerHelper.Log("Exited CancelEngine.ProcessCancel");
-                return apiResponse;
+                return new Tuple<string, string>(jsonPayload, apiResponse);
             }
             catch (Exception ex)
             {

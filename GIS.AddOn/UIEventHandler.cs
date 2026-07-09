@@ -117,7 +117,9 @@ namespace GIS.AddOn
                             var dbHelper = new DatabaseHelper(_connectionManager.Company);
                             _connectionManager.SboApplication.StatusBar.SetText("Generating E-Invoice, please wait...", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             
-                            string apiRes = CombinedEngine.ProcessCombined(dbHelper, objType, docEntry);
+                            var result = CombinedEngine.ProcessCombined(dbHelper, objType, docEntry);
+                            string jsonPayload = result.Item1;
+                            string apiRes = result.Item2;
 
                             // Parse the API Response to extract exact errors
                             try
@@ -180,6 +182,10 @@ namespace GIS.AddOn
                                 LoggerHelper.Log($"Failed to parse API Response in UI: {parseEx.Message}");
                                 _connectionManager.SboApplication.StatusBar.SetText("Combined Generation Processed, but response could not be read.", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             }
+                            finally
+                            {
+                                Helpers.ResponseHandler.RouteResponse("combined", dbHelper, objType, docEntry, jsonPayload, apiRes);
+                            }
                         }
                         else if (actionName == "Generate E-Invoice")
                         {
@@ -187,7 +193,9 @@ namespace GIS.AddOn
                             var dbHelper = new DatabaseHelper(_connectionManager.Company);
                             _connectionManager.SboApplication.StatusBar.SetText("Generating Standalone E-Invoice, please wait...", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             
-                            string apiRes = EInvoiceEngine.ProcessEInvoice(dbHelper, objType, docEntry);
+                            var result = EInvoiceEngine.ProcessEInvoice(dbHelper, objType, docEntry);
+                            string jsonPayload = result.Item1;
+                            string apiRes = result.Item2;
 
                             // Parse the API Response to extract exact errors
                             try
@@ -216,6 +224,11 @@ namespace GIS.AddOn
                                 LoggerHelper.Log($"Failed to parse API Response in UI: {parseEx.Message}");
                                 _connectionManager.SboApplication.StatusBar.SetText("Standalone E-Invoice Processed, but response could not be read.", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             }
+                            finally
+                            {
+                                Helpers.IResponseHandler responseHandler = new Helpers.CombinedResponseHandler();
+                                responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
+                            }
                         }
                         else if (actionName == "Cancel E-Invoice")
                         {
@@ -223,7 +236,9 @@ namespace GIS.AddOn
                             var dbHelper = new DatabaseHelper(_connectionManager.Company);
                             _connectionManager.SboApplication.StatusBar.SetText("Cancelling E-Invoice, please wait...", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
 
-                            string apiRes = CancelEngine.ProcessCancel(dbHelper, objType, docEntry);
+                            var result = CancelEngine.ProcessCancel(dbHelper, objType, docEntry);
+                            string jsonPayload = result.Item1;
+                            string apiRes = result.Item2;
 
                             try
                             {
@@ -250,6 +265,10 @@ namespace GIS.AddOn
                                 LoggerHelper.Log($"Failed to parse Cancel Response in UI: {parseEx.Message}");
                                 _connectionManager.SboApplication.StatusBar.SetText("Cancellation Processed, but response could not be read.", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             }
+                            finally
+                            {
+                                Helpers.CancelResponseHandler.RouteCancelResponse(dbHelper, objType, docEntry, jsonPayload, apiRes);
+                            }
                         }
                         else if (actionName == "Generate E-Way Bill")
                         {
@@ -257,7 +276,9 @@ namespace GIS.AddOn
                             var dbHelper = new DatabaseHelper(_connectionManager.Company);
                             _connectionManager.SboApplication.StatusBar.SetText("Generating E-Way Bill, please wait...", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             
-                            string apiRes = EWayBillEngine.ProcessEWayBill(dbHelper, objType, docEntry);
+                            var result = EWayBillEngine.ProcessEWayBill(dbHelper, objType, docEntry);
+                            string jsonPayload = result.Item1;
+                            string apiRes = result.Item2;
 
                             try
                             {
@@ -282,6 +303,11 @@ namespace GIS.AddOn
                                 LoggerHelper.Log($"Failed to parse API Response: {parseEx.Message}");
                                 _connectionManager.SboApplication.StatusBar.SetText("E-Way Bill Processed, but response could not be read.", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             }
+                            finally
+                            {
+                                Helpers.IResponseHandler responseHandler = new Helpers.EWayBillResponseHandler();
+                                responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
+                            }
                         }
                         else if (actionName == "Cancel E-Way Bill")
                         {
@@ -289,7 +315,9 @@ namespace GIS.AddOn
                             var dbHelper = new DatabaseHelper(_connectionManager.Company);
                             _connectionManager.SboApplication.StatusBar.SetText("Cancelling E-Way Bill, please wait...", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
 
-                            string apiRes = EWayBillCancelEngine.ProcessCancel(dbHelper, objType, docEntry);
+                            var result = EWayBillCancelEngine.ProcessCancel(dbHelper, objType, docEntry);
+                            string jsonPayload = result.Item1;
+                            string apiRes = result.Item2;
 
                             try
                             {
@@ -314,6 +342,11 @@ namespace GIS.AddOn
                                 LoggerHelper.Log($"Failed to parse Cancel Response: {parseEx.Message}");
                                 _connectionManager.SboApplication.StatusBar.SetText("Cancellation Processed, but response could not be read.", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             }
+                            finally
+                            {
+                                Helpers.IResponseHandler responseHandler = new Helpers.EWayBillCancelResponseHandler();
+                                responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
+                            }
                         }
                         else if (actionName == "Inventory Transfer")
                         {
@@ -322,7 +355,9 @@ namespace GIS.AddOn
                             _connectionManager.SboApplication.StatusBar.SetText("Generating Inventory Transfer E-Way Bill, please wait...", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
                             
                             // It uses the same engine but the PayloadGenerator will map it correctly based on objType 67
-                            string apiRes = EWayBillEngine.ProcessEWayBill(dbHelper, objType, docEntry);
+                            var result = EWayBillEngine.ProcessEWayBill(dbHelper, objType, docEntry);
+                            string jsonPayload = result.Item1;
+                            string apiRes = result.Item2;
 
                             // We will process the response exactly like Generate E-Way Bill
                             try
@@ -347,6 +382,11 @@ namespace GIS.AddOn
                             {
                                 LoggerHelper.Log($"Failed to parse API Response: {parseEx.Message}");
                                 _connectionManager.SboApplication.StatusBar.SetText("E-Way Bill Processed, but response could not be read.", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Warning);
+                            }
+                            finally
+                            {
+                                Helpers.IResponseHandler responseHandler = new Helpers.EWayBillResponseHandler();
+                                responseHandler.Handle(dbHelper, objType, docEntry, jsonPayload, apiRes);
                             }
                         }
                         else if (actionName == "Update Part B")
