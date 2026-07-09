@@ -54,16 +54,13 @@ namespace GIS.Framework.Helpers
                 else if (DateTime.TryParse(rawEwbDate, out DateTime dtEwb))
                     ewbDate = dtEwb.ToString("yyyy-MM-dd HH:mm:ss");
                 
-                string alert = jObj["alert"]?.ToString() ?? "";
                 string distance = "";
-                if (!string.IsNullOrEmpty(alert))
+                try
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(alert, @"\d+");
-                    if (match.Success)
-                    {
-                        distance = match.Value;
-                    }
+                    var reqObj = Newtonsoft.Json.Linq.JObject.Parse(payload);
+                    distance = reqObj["transDistance"]?.ToString();
                 }
+                catch { }
                 
                 if (!string.IsNullOrEmpty(ewbNo))
                 {
