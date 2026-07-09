@@ -146,15 +146,18 @@ namespace GIS.Framework.Helpers
                 {
                     string val = hRow[colName].ToString().Trim();
                     // Basic numeric type conversions for proper JSON
-                    if (colName == "transDistance" || colName.Contains("Pincode") || colName.Contains("StateCode") || colName == "transactionType" || colName == "transMode" || colName == "subSupplyType")
+                    if (colName == "transDistance" || colName.Contains("Pincode") || colName.Contains("StateCode") || colName == "transactionType" || colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase) || colName == "transMode" || colName == "subSupplyType")
                     {
                         if (int.TryParse(val, out int num)) 
                         {
-                            payload[colName] = num;
+                            if (colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase))
+                                payload["transactionType"] = num; // Remap case-sensitive UDF to strict JSON key
+                            else
+                                payload[colName] = num;
                         }
                         else 
                         {
-                            if (colName == "transactionType") payload[colName] = 1; // Default transaction type
+                            if (colName == "transactionType" || colName.Equals("U_TransType", StringComparison.OrdinalIgnoreCase)) payload["transactionType"] = 1; // Default transaction type
                             else if (colName == "transDistance") payload[colName] = DistanceHelper.GetDistanceWithCache(dbHelper, hRow); // Check cache
                             else if (string.IsNullOrEmpty(val)) { /* Omit completely from Dictionary to avoid 'Invalid Json' */ }
                             else payload[colName] = val; // Fallback

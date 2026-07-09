@@ -73,6 +73,27 @@ namespace GIS.Framework.Helpers
                     Phone = GetString(headerRow, "Buyer_Ph"),
                     Email = GetString(headerRow, "Buyer_Em")
                 },
+                DispatchDetails = GetString(headerRow, "Disp_Dtl_Nm") != null || GetString(headerRow, "Disp_Dtl_Addr1") != null ? new PartyDetails
+                {
+                    LegalName = GetString(headerRow, "Disp_Dtl_Nm"),
+                    TradeName = GetString(headerRow, "Disp_Dtl_Nm"),
+                    Address1 = GetString(headerRow, "Disp_Dtl_Addr1"),
+                    Address2 = GetString(headerRow, "Disp_Dtl_Addr2"),
+                    Location = GetString(headerRow, "Disp_Dtl_Loc"),
+                    Pincode = GetString(headerRow, "Disp_Dtl_Pin") != null ? Convert.ToInt32(GetString(headerRow, "Disp_Dtl_Pin")) : 0,
+                    StateCode_Address = GetString(headerRow, "Disp_Dtl_Stcd")
+                } : null,
+                ShippingDetails = GetString(headerRow, "ShipDtls_GSTIN") != null ? new PartyDetails
+                {
+                    Gstin = GetString(headerRow, "ShipDtls_GSTIN"),
+                    LegalName = GetString(headerRow, "ShipDtls_LglNm"),
+                    TradeName = GetString(headerRow, "ShipDtls_TrdNm"),
+                    Address1 = GetString(headerRow, "ShipDtls_Addr1"),
+                    Address2 = GetString(headerRow, "ShipDtls_Addr2"),
+                    Location = GetString(headerRow, "ShipDtls_Loc"),
+                    Pincode = GetString(headerRow, "ShipDtls_Pin") != null ? Convert.ToInt32(GetString(headerRow, "ShipDtls_Pin")) : 0,
+                    StateCode_Address = GetString(headerRow, "ShipDtls_Stcd")
+                } : null,
                 ValueDetails = new ValueDetails
                 {
                     AssessableValue = GetDecimal(headerRow, "AssVal"),
