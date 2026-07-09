@@ -4,7 +4,7 @@ using GIS.Framework.Interfaces;
 
 namespace GIS.Framework.Helpers
 {
-    internal static class CancelResponseHandler
+    public static class CancelResponseHandler
     {
         public static void RouteCancelResponse(IDatabaseHelper dbHelper, string objType, string docEntry, string requestPayload, string rawJsonResponse)
         {

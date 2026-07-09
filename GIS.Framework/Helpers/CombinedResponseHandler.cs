@@ -3,7 +3,7 @@ using System;
 
 namespace GIS.Framework.Helpers
 {
-    internal class CombinedResponseHandler : IResponseHandler
+    public class CombinedResponseHandler : IResponseHandler
     {
         public void Handle(IDatabaseHelper dbHelper, string objType, string docEntry, string rawJsonRequest, string rawJsonResponse)
         {

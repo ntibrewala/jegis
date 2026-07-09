@@ -3,7 +3,7 @@ using System;
 
 namespace GIS.Framework.Helpers
 {
-    internal static class ResponseHandler
+    public static class ResponseHandler
     {
         public static void RouteResponse(string actionType, IDatabaseHelper dbHelper, string objType, string docEntry, string rawJsonRequest, string rawJsonResponse)
         {
