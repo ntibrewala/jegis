@@ -15,9 +15,44 @@ namespace GIS.AddOn
         {
             _connectionManager = connectionManager;
 
+            SetFilters();
+
             // Subscribe to SAP UI events
             _connectionManager.SboApplication.ItemEvent += new SAPbouiCOM._IApplicationEvents_ItemEventEventHandler(SboApplication_ItemEvent);
             LoggerHelper.Log("UIEventHandler initialized and listening for SAP events.");
+        }
+
+        private void SetFilters()
+        {
+            SAPbouiCOM.EventFilters oFilters = new SAPbouiCOM.EventFilters();
+            SAPbouiCOM.EventFilter oFilter;
+
+            // 1. Filter for FORM_LOAD
+            oFilter = oFilters.Add(SAPbouiCOM.BoEventTypes.et_FORM_LOAD);
+            oFilter.AddEx("133");
+            oFilter.AddEx("179");
+            oFilter.AddEx("940");
+
+            // 2. Filter for COMBO_SELECT
+            oFilter = oFilters.Add(SAPbouiCOM.BoEventTypes.et_COMBO_SELECT);
+            oFilter.AddEx("133");
+            oFilter.AddEx("179");
+            oFilter.AddEx("940");
+
+            // 3. Filter for ITEM_PRESSED (Custom Forms)
+            oFilter = oFilters.Add(SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED);
+            oFilter.AddEx("GIS_OUPV");
+            oFilter.AddEx("GIS_OEXT");
+            oFilter.AddEx("GIS_OUPT");
+            
+            // 4. Filter for FORM_UNLOAD (Custom Forms)
+            oFilter = oFilters.Add(SAPbouiCOM.BoEventTypes.et_FORM_UNLOAD);
+            oFilter.AddEx("GIS_OUPV");
+            oFilter.AddEx("GIS_OEXT");
+            oFilter.AddEx("GIS_OUPT");
+
+            _connectionManager.SboApplication.SetFilter(oFilters);
+            LoggerHelper.Log("Event filters applied successfully.");
         }
 
         private bool ConfirmAction(string buttonCaption)
