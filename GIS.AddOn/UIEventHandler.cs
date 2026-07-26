@@ -32,12 +32,14 @@ namespace GIS.AddOn
             oFilter.AddEx("133");
             oFilter.AddEx("179");
             oFilter.AddEx("940");
+            oFilter.AddEx("143");
 
             // 2. Filter for COMBO_SELECT
             oFilter = oFilters.Add(SAPbouiCOM.BoEventTypes.et_COMBO_SELECT);
             oFilter.AddEx("133");
             oFilter.AddEx("179");
             oFilter.AddEx("940");
+            oFilter.AddEx("143");
 
             // 3. Filter for ITEM_PRESSED (Custom Forms)
             oFilter = oFilters.Add(SAPbouiCOM.BoEventTypes.et_ITEM_PRESSED);
@@ -87,7 +89,7 @@ namespace GIS.AddOn
                 }
 
                 // DRAW UI ON FORM LOAD FOR INVOICE (133), CREDIT MEMO (179), and INVENTORY TRANSFER (940)
-                if ((pVal.FormTypeEx == "133" || pVal.FormTypeEx == "179" || pVal.FormTypeEx == "940") && pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_LOAD && !pVal.BeforeAction)
+                if ((pVal.FormTypeEx == "133" || pVal.FormTypeEx == "179" || pVal.FormTypeEx == "940" || pVal.FormTypeEx == "143") && pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_LOAD && !pVal.BeforeAction)
                 {
                     var oForm = _connectionManager.SboApplication.Forms.Item(FormUID);
                     UIHelper.DrawLegacyButtonCombos(oForm);
@@ -95,7 +97,7 @@ namespace GIS.AddOn
                 }
 
                 // LISTEN FOR COMBOBOX SELECTION ON THE MAIN FORM (133, 179, 940) FOR OUR CUSTOM BUTTON COMBOS
-                if ((pVal.FormTypeEx == "133" || pVal.FormTypeEx == "179" || pVal.FormTypeEx == "940") && pVal.EventType == SAPbouiCOM.BoEventTypes.et_COMBO_SELECT && !pVal.BeforeAction)
+                if ((pVal.FormTypeEx == "133" || pVal.FormTypeEx == "179" || pVal.FormTypeEx == "940" || pVal.FormTypeEx == "143") && pVal.EventType == SAPbouiCOM.BoEventTypes.et_COMBO_SELECT && !pVal.BeforeAction)
                 {
                     if (pVal.ItemUID == "btnComb" || pVal.ItemUID == "btnEWay" || pVal.ItemUID == "btnEInv")
                     {
@@ -135,8 +137,8 @@ namespace GIS.AddOn
                         }
 
                         // Retrieve the internal DocEntry
-                        string objType = (pVal.FormTypeEx == "133") ? "13" : (pVal.FormTypeEx == "179") ? "14" : "67";
-                        string tableName = (objType == "13") ? "OINV" : (objType == "14") ? "ORIN" : "OWTR";
+                        string objType = (pVal.FormTypeEx == "133") ? "13" : (pVal.FormTypeEx == "179") ? "14" : (pVal.FormTypeEx == "143") ? "19" : "67";
+                        string tableName = (objType == "13") ? "OINV" : (objType == "14") ? "ORIN" : (objType == "19") ? "ORPC" : "OWTR";
                         string docEntry = oForm.DataSources.DBDataSources.Item(tableName).GetValue("DocEntry", 0).Trim();
 
                         if (string.IsNullOrEmpty(docEntry))
