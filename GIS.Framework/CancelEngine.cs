@@ -73,9 +73,7 @@ namespace GIS.Framework
 
                 // Step 4: Run the API
                 LoggerHelper.Log("Executing Cancel API POST...");
-                try {
-                    System.IO.File.WriteAllText(@"C:\ProgramData\CancelDebug.txt", $"URL: {targetUrl}\nToken: {tokenResponse.Data.AuthToken}\nGSTIN: {credentials.GSTIN}");
-                } catch { }
+                throw new Exception($"DEBUG: URL={targetUrl} | GSTIN={credentials.GSTIN} | TokenLength={tokenResponse.Data.AuthToken.Length}");
                 string apiResponse = ApiRunner.PostCancelInvoice(
                     jsonPayload,
                     tokenResponse.Data.AuthToken,
