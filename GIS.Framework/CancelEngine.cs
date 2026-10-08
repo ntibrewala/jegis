@@ -46,8 +46,21 @@ namespace GIS.Framework
                 if (tokenResponse.Data == null || string.IsNullOrEmpty(tokenResponse.Data.AuthToken)) throw new Exception("Failed to acquire valid AuthToken. Process aborted.");
 
                 // Target URL
-                string targetUrl = "https://gstsandbox.charteredinfo.com/eicore/dec/v1.03/Invoice/Cancel";
-                // If it were production, we would map it accordingly, but hardcoding sandbox for now based on your python test.
+                string targetUrl = "https://einvapi.charteredinfo.com/eicore/dec/v1.03/Invoice/Cancel";
+                try
+                {
+                    string urlQuery = "SELECT \"U_Url\" FROM \"@GIS_EI_OAPI\" WHERE \"U_Action\"='CancelEInvoice'";
+                    var urlDt = dbHelper.ExecuteQuery(urlQuery);
+                    if (urlDt != null && urlDt.Rows.Count > 0 && urlDt.Rows[0]["U_Url"] != DBNull.Value)
+                    {
+                        string dbUrl = urlDt.Rows[0]["U_Url"].ToString().Trim();
+                        if (!string.IsNullOrEmpty(dbUrl)) targetUrl = dbUrl;
+                    }
+                }
+                catch
+                {
+                    LoggerHelper.Log("Could not fetch CancelEInvoice URL from @GIS_EI_OAPI, using fallback.");
+                }
 
                 // Step 3: Create Cancel Payload
                 var cancelPayload = new ReqPlCancelIRN
