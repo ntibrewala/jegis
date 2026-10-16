@@ -82,6 +82,25 @@ namespace GIS.Framework
                     targetUrl
                 );
 
+                // Auto-heal on GSP752 / expired AuthToken: clear cache, fetch fresh token, and retry once
+                if (Helpers.AuthHelper.IsTokenExpiredError(apiResponse))
+                {
+                    Helpers.LoggerHelper.Log($"Token rejected (GSP752) for GSTIN {credentials.GSTIN}. Evicting cache and auto-retrying with fresh token...");
+                    var freshTokenResponse = Helpers.AuthHelper.GetCharteredAuthTokenSync(dbHelper, objType, docEntry, forceRefresh: true);
+                    if (freshTokenResponse?.Data != null && !string.IsNullOrEmpty(freshTokenResponse.Data.AuthToken))
+                    {
+                        apiResponse = Helpers.ApiRunner.PostInvoice(
+                            jsonPayload,
+                            freshTokenResponse.Data.AuthToken,
+                            credentials.GSTIN,
+                            credentials.UserName,
+                            credentials.AspPassword,
+                            credentials.AspId,
+                            targetUrl
+                        );
+                    }
+                }
+
                 // Step 5: Write the response to SAP (OINV/ORIN) and log to TEC_EI_LOG
                 // DEFERRED: DB Write-Back will now be handled by UIEventHandler after showing Success Bar
 

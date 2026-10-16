@@ -6,6 +6,7 @@ namespace GIS.Framework.Models
         public string status { get; set; }
         public TokenData Data { get; set; }
         public string authtoken { get; set; }
+        public string TokenExpiry { get; set; }
         public string ErrorDetails { get; set; }
         public ErrorResponse error { get; set; }
     }

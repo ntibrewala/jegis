@@ -48,11 +48,35 @@ namespace GIS.Framework.Helpers
             return creds;
         }
 
+        public static void ClearCachedToken(IDatabaseHelper dbHelper, string gstin)
+        {
+            if (string.IsNullOrEmpty(gstin)) return;
+            string deleteQuery = $"DELETE FROM \"TEC_AUTHTOKEN\" WHERE \"GSTIN\" = '{gstin}'";
+            dbHelper.ExecuteNonQuery(deleteQuery);
+        }
+
         public static void SaveTokenToCache(IDatabaseHelper dbHelper, string gstin, string clientId, string userName, string authToken, string tokenExpiryString)
         {
-            // If the table is User Defined, make sure it matches the exact schema
-            // We use standard UPSERT logic (or delete/insert) to cache the token for this GSTIN
-            string safeExpiry = string.IsNullOrEmpty(tokenExpiryString) ? "NULL" : $"'{tokenExpiryString}'";
+            // Prevent extending expiry if Chartered Info returned the exact same old token without an explicit new expiry
+            try
+            {
+                var dtExisting = dbHelper.ExecuteQuery($"SELECT \"AuthToken\" FROM \"TEC_AUTHTOKEN\" WHERE \"GSTIN\" = '{gstin}'");
+                if (dtExisting != null && dtExisting.Rows.Count > 0)
+                {
+                    string prevToken = dtExisting.Rows[0]["AuthToken"]?.ToString() ?? "";
+                    if (prevToken == authToken && string.IsNullOrEmpty(tokenExpiryString))
+                    {
+                        LoggerHelper.Log($"Chartered Info returned existing token for GSTIN {gstin}; preserving original expiry instead of extending +6h.");
+                        return;
+                    }
+                }
+            }
+            catch { }
+
+            // Use API-provided expiry if available; otherwise use HANA server clock (+5h 50m = 21000s) to avoid PC vs DB clock skew
+            string expirySql = string.IsNullOrEmpty(tokenExpiryString)
+                ? "ADD_SECONDS(CURRENT_TIMESTAMP, 21000)"
+                : $"'{tokenExpiryString}'";
             
             // Delete old token
             string deleteQuery = $"DELETE FROM \"TEC_AUTHTOKEN\" WHERE \"GSTIN\" = '{gstin}'";
@@ -61,7 +85,7 @@ namespace GIS.Framework.Helpers
             // Insert new token
             string insertQuery = $@"
                 INSERT INTO ""TEC_AUTHTOKEN"" (""GSTIN"", ""ClientId"", ""UserName"", ""Type"", ""AuthToken"", ""TokenExpiry"", ""CreateDate"")
-                VALUES ('{gstin}', '{clientId}', '{userName}', 'E-Invoice', '{authToken}', {safeExpiry}, CURRENT_TIMESTAMP)";
+                VALUES ('{gstin}', '{clientId}', '{userName}', 'E-Invoice', '{authToken}', {expirySql}, CURRENT_TIMESTAMP)";
                 
             dbHelper.ExecuteNonQuery(insertQuery);
         }

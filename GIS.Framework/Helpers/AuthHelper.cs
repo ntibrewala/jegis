@@ -12,27 +12,35 @@ namespace GIS.Framework.Helpers
     /// </summary>
     public static class AuthHelper
     {
-        public static async Task<TokenResponse> GetCharteredAuthTokenAsync(IDatabaseHelper dbHelper, string objType, string docEntry)
+        public static bool IsTokenExpiredError(string apiResponse)
+        {
+            if (string.IsNullOrEmpty(apiResponse)) return false;
+            return apiResponse.IndexOf("GSP752", StringComparison.OrdinalIgnoreCase) >= 0
+                || apiResponse.IndexOf("AuthToken not found or expired", StringComparison.OrdinalIgnoreCase) >= 0
+                || apiResponse.IndexOf("Invalid Token", StringComparison.OrdinalIgnoreCase) >= 0
+                || apiResponse.IndexOf("Token Expired", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public static async Task<TokenResponse> GetCharteredAuthTokenAsync(IDatabaseHelper dbHelper, string objType, string docEntry, bool forceRefresh = false)
         {
             LoggerHelper.Log("Entered AuthHelper.GetCharteredAuthTokenAsync");
-            LoggerHelper.Log($"Starting CharteredAuthToken fetch process for ObjType: {objType}, DocEntry: {docEntry}...");
+            LoggerHelper.Log($"Starting CharteredAuthToken fetch process for ObjType: {objType}, DocEntry: {docEntry}, ForceRefresh: {forceRefresh}...");
             
             // 1. Fetch Credentials & Check Cache
             var credentials = CredentialManager.GetCredentialsForDocument(dbHelper, objType, docEntry);
-            
-            // Check if token exists and is valid for at least the next 5 minutes (buffer)
-            bool isTokenValid = false;
-            if (!string.IsNullOrEmpty(credentials.ExistingAuthToken) && credentials.ExistingTokenExpiry.HasValue)
+
+            if (forceRefresh)
             {
-                if (credentials.ExistingTokenExpiry.Value > DateTime.Now.AddMinutes(5))
-                {
-                    isTokenValid = true;
-                }
-                else
-                {
-                    LoggerHelper.Log($"Token exists but expires soon ({credentials.ExistingTokenExpiry.Value}). Fetching new token...");
-                }
+                LoggerHelper.Log($"ForceRefresh requested for GSTIN {credentials.GSTIN}. Evicting cached token from TEC_AUTHTOKEN...");
+                CredentialManager.ClearCachedToken(dbHelper, credentials.GSTIN);
+                credentials.ExistingAuthToken = null;
+                credentials.ExistingTokenExpiry = null;
             }
+            
+            // Trust TEC_COMBINED_TOKEN_GET (which already validates TokenExpiry > CURRENT_TIMESTAMP on the HANA DB clock).
+            // Do NOT prematurely invalidate using PC clock AddMinutes(5), because calling /auth before true NIC expiry
+            // causes Chartered Info to return the same dying token.
+            bool isTokenValid = !forceRefresh && !string.IsNullOrEmpty(credentials.ExistingAuthToken);
 
             if (isTokenValid)
             {
@@ -63,7 +71,6 @@ namespace GIS.Framework.Helpers
             }
 
             // 2. Map DB Credentials to HTTP Headers
-            // The Production Chartered Info API v1.03 is strict about header casing and requires EwbPwd for combined generation
             var headers = new Dictionary<string, string>
             {
                 { "aspid", credentials.AspId },
@@ -72,19 +79,24 @@ namespace GIS.Framework.Helpers
                 { "user_name", credentials.UserName },       // Strictly 'user_name' in v1.04
                 { "eInvPwd", credentials.ApiPassword }      // Required for E-Invoice token
             };
+
+            if (forceRefresh)
+            {
+                headers["ForceRefreshAccessToken"] = "true";
+            }
             
             LoggerHelper.Log($"No valid token in cache. Making live HTTP call to {authUrl}...");
             var tokenResponse = await HttpHelper.GetAsync<TokenResponse>(authUrl, headers);
             
             bool isSuccess = tokenResponse.Status == 1 || tokenResponse.status == "1";
             string newToken = tokenResponse.Data?.AuthToken ?? tokenResponse.authtoken;
+            string apiExpiry = tokenResponse.Data?.TokenExpiry ?? tokenResponse.TokenExpiry;
 
             if (isSuccess && !string.IsNullOrEmpty(newToken))
             {
                 LoggerHelper.Log($"Successfully fetched new AuthToken from CharteredInfo API.");
                 
-                // 3. Cache the Token in SAP DB
-                string calculatedExpiry = DateTime.Now.AddHours(6).ToString("yyyy-MM-dd HH:mm:ss");
+                // 3. Cache the Token in SAP DB (uses API TokenExpiry if provided, or HANA CURRENT_TIMESTAMP + 5h 50m)
                 try {
                     CredentialManager.SaveTokenToCache(
                         dbHelper, 
@@ -92,7 +104,7 @@ namespace GIS.Framework.Helpers
                         credentials.ClientId ?? "", 
                         credentials.UserName, 
                         newToken, 
-                        calculatedExpiry
+                        apiExpiry
                     );
                     LoggerHelper.Log($"Successfully cached new AuthToken for GSTIN {credentials.GSTIN}.");
                 } catch (Exception ex) {
@@ -102,7 +114,7 @@ namespace GIS.Framework.Helpers
                 // Populate Data for downstream consumers if flat format
                 if (tokenResponse.Data == null)
                 {
-                    tokenResponse.Data = new TokenData { AuthToken = newToken, TokenExpiry = calculatedExpiry };
+                    tokenResponse.Data = new TokenData { AuthToken = newToken, TokenExpiry = apiExpiry };
                 }
                 
                 LoggerHelper.Log("Exited AuthHelper.GetCharteredAuthTokenAsync");
@@ -115,9 +127,9 @@ namespace GIS.Framework.Helpers
             }
         }
 
-        public static TokenResponse GetCharteredAuthTokenSync(IDatabaseHelper dbHelper, string objType, string docEntry)
+        public static TokenResponse GetCharteredAuthTokenSync(IDatabaseHelper dbHelper, string objType, string docEntry, bool forceRefresh = false)
         {
-            return GetCharteredAuthTokenAsync(dbHelper, objType, docEntry).GetAwaiter().GetResult();
+            return GetCharteredAuthTokenAsync(dbHelper, objType, docEntry, forceRefresh).GetAwaiter().GetResult();
         }
     }
 }
