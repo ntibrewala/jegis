@@ -162,15 +162,19 @@ namespace GIS.AddOn
                             try
                             {
                                 JObject jObj = JObject.Parse(apiRes);
-                                string status = jObj["Status"]?.ToString() ?? "";
+                                string status = jObj["Status"]?.ToString() ?? jObj["status_cd"]?.ToString() ?? "";
                                 
-                                if (status == "0" || status.ToLower() == "false")
+                                if (status == "0" || status.ToLower() == "false" || jObj["error"] != null)
                                 {
-                                    // Total Failure
+                                    // Total Failure (supports both NIC ErrorDetails and GSP error.message formats)
                                     string errorMsg = "Combined Failed.";
                                     if (jObj["ErrorDetails"] != null && jObj["ErrorDetails"].HasValues)
                                     {
                                         errorMsg = jObj["ErrorDetails"][0]["ErrorMessage"]?.ToString() ?? errorMsg;
+                                    }
+                                    else if (jObj["error"] != null)
+                                    {
+                                        errorMsg = jObj["error"]["message"]?.ToString() ?? jObj["error"].ToString();
                                     }
                                     _connectionManager.SboApplication.MessageBox($"API Error: {errorMsg}");
                                     _connectionManager.SboApplication.StatusBar.SetText($"API Error: {errorMsg}", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
@@ -238,15 +242,19 @@ namespace GIS.AddOn
                             try
                             {
                                 JObject jObj = JObject.Parse(apiRes);
-                                string status = jObj["Status"]?.ToString() ?? "";
+                                string status = jObj["Status"]?.ToString() ?? jObj["status_cd"]?.ToString() ?? "";
                                 
-                                if (status == "0" || status.ToLower() == "false")
+                                if (status == "0" || status.ToLower() == "false" || jObj["error"] != null)
                                 {
-                                    // Total Failure
+                                    // Total Failure (supports both NIC ErrorDetails and GSP error.message formats)
                                     string errorMsg = "Standalone E-Invoice Failed.";
                                     if (jObj["ErrorDetails"] != null && jObj["ErrorDetails"].HasValues)
                                     {
                                         errorMsg = jObj["ErrorDetails"][0]["ErrorMessage"]?.ToString() ?? errorMsg;
+                                    }
+                                    else if (jObj["error"] != null)
+                                    {
+                                        errorMsg = jObj["error"]["message"]?.ToString() ?? jObj["error"].ToString();
                                     }
                                     _connectionManager.SboApplication.MessageBox($"API Error: {errorMsg}");
                                     _connectionManager.SboApplication.StatusBar.SetText($"API Error: {errorMsg}", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
@@ -280,14 +288,18 @@ namespace GIS.AddOn
                             try
                             {
                                 JObject jObj = JObject.Parse(apiRes);
-                                string status = jObj["Status"]?.ToString() ?? "";
+                                string status = jObj["Status"]?.ToString() ?? jObj["status_cd"]?.ToString() ?? "";
 
-                                if (status == "0" || status.ToLower() == "false")
+                                if (status == "0" || status.ToLower() == "false" || jObj["error"] != null)
                                 {
                                     string errorMsg = "Cancellation Failed.";
                                     if (jObj["ErrorDetails"] != null && jObj["ErrorDetails"].HasValues)
                                     {
                                         errorMsg = jObj["ErrorDetails"][0]["ErrorMessage"]?.ToString() ?? errorMsg;
+                                    }
+                                    else if (jObj["error"] != null)
+                                    {
+                                        errorMsg = jObj["error"]["message"]?.ToString() ?? jObj["error"].ToString();
                                     }
                                     _connectionManager.SboApplication.MessageBox($"API Error: {errorMsg}");
                                     _connectionManager.SboApplication.StatusBar.SetText($"API Error: {errorMsg}", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
@@ -400,13 +412,15 @@ namespace GIS.AddOn
                             try
                             {
                                 JObject jObj = JObject.Parse(apiRes);
-                                string status = jObj["Status"]?.ToString() ?? "";
+                                string status = jObj["Status"]?.ToString() ?? jObj["status_cd"]?.ToString() ?? "";
                                 
-                                if (status == "0" || status.ToLower() == "false")
+                                if (status == "0" || status.ToLower() == "false" || jObj["error"] != null)
                                 {
                                     string errorMsg = "E-Way Bill Failed.";
                                     if (jObj["ErrorDetails"] != null && jObj["ErrorDetails"].HasValues)
                                         errorMsg = jObj["ErrorDetails"][0]["ErrorMessage"]?.ToString() ?? errorMsg;
+                                    else if (jObj["error"] != null)
+                                        errorMsg = jObj["error"]["message"]?.ToString() ?? jObj["error"].ToString();
                                     _connectionManager.SboApplication.MessageBox($"API Error: {errorMsg}");
                                     _connectionManager.SboApplication.StatusBar.SetText($"API Error: {errorMsg}", SAPbouiCOM.BoMessageTime.bmt_Long, SAPbouiCOM.BoStatusBarMessageType.smt_Error);
                                 }
