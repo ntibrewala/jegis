@@ -44,6 +44,9 @@ namespace GIS.AddOn.Helpers
                         oItemEInv.DisplayDesc = true;
                     }
                     oComboEInv.Caption = "E-Invoice";
+                    // Grey out (disable) E-Invoice button in JEGIS while keeping all code intact
+                    oItemEInv.Enabled = false;
+                    oItemEInv.SetAutoManagedAttribute(BoAutoManagedAttr.ama_Editable, -1, BoModeVisualBehavior.mvb_False);
                 }
 
                 // 2. Create btnEWay
@@ -117,6 +120,9 @@ namespace GIS.AddOn.Helpers
                         oItemComb.DisplayDesc = true;
                     }
                     oComboComb.Caption = "Combined";
+                    // Grey out (disable) Combined button in JEGIS while keeping all code intact
+                    oItemComb.Enabled = false;
+                    oItemComb.SetAutoManagedAttribute(BoAutoManagedAttr.ama_Editable, -1, BoModeVisualBehavior.mvb_False);
                 }
 
                 oForm.Freeze(false);
