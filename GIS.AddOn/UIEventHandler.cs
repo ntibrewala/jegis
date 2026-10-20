@@ -33,6 +33,10 @@ namespace GIS.AddOn
             oFilter.AddEx("179");
             oFilter.AddEx("940");
             oFilter.AddEx("143");
+            oFilter.AddEx("-133");
+            oFilter.AddEx("-179");
+            oFilter.AddEx("-940");
+            oFilter.AddEx("-143");
 
             // 2. Filter for COMBO_SELECT
             oFilter = oFilters.Add(SAPbouiCOM.BoEventTypes.et_COMBO_SELECT);
@@ -88,11 +92,27 @@ namespace GIS.AddOn
                     return;
                 }
 
+                // COMPACT UDF PANEL ON FORM LOAD (-133, -179, -940, -143)
+                if ((pVal.FormTypeEx == "-133" || pVal.FormTypeEx == "-179" || pVal.FormTypeEx == "-940" || pVal.FormTypeEx == "-143") && pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_LOAD && !pVal.BeforeAction)
+                {
+                    var oUdfForm = _connectionManager.SboApplication.Forms.Item(FormUID);
+                    UIHelper.CompactUdfPanel(oUdfForm);
+                    return;
+                }
+
                 // DRAW UI ON FORM LOAD FOR INVOICE (133), CREDIT MEMO (179), and INVENTORY TRANSFER (940)
                 if ((pVal.FormTypeEx == "133" || pVal.FormTypeEx == "179" || pVal.FormTypeEx == "940" || pVal.FormTypeEx == "143") && pVal.EventType == SAPbouiCOM.BoEventTypes.et_FORM_LOAD && !pVal.BeforeAction)
                 {
                     var oForm = _connectionManager.SboApplication.Forms.Item(FormUID);
                     UIHelper.DrawLegacyButtonCombos(oForm);
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(oForm.UDFFormUID))
+                        {
+                            UIHelper.CompactUdfPanel(_connectionManager.SboApplication.Forms.Item(oForm.UDFFormUID));
+                        }
+                    }
+                    catch { }
                     return;
                 }
 
