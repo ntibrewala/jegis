@@ -6,53 +6,6 @@ namespace GIS.AddOn.Helpers
 {
     public static class UIHelper
     {
-        public static void CompactUdfPanel(Form oUdfForm)
-        {
-            if (oUdfForm == null) return;
-            try
-            {
-                oUdfForm.Freeze(true);
-                int targetHeight = 16;
-                try
-                {
-                    targetHeight = oUdfForm.Items.Item("U_ewayBDa").Height;
-                }
-                catch { }
-
-                string[] tallFields = new[] { "U_IRN", "U_ewayBNo" };
-                foreach (string fieldUid in tallFields)
-                {
-                    try
-                    {
-                        Item fldItem = oUdfForm.Items.Item(fieldUid);
-                        if (fldItem.Height > targetHeight + 10)
-                        {
-                            int oldBottom = fldItem.Top + fldItem.Height;
-                            int shrinkBy = fldItem.Height - targetHeight;
-                            fldItem.Height = targetHeight;
-
-                            // Shift all items located below this field upward by shrinkBy
-                            for (int i = 0; i < oUdfForm.Items.Count; i++)
-                            {
-                                Item itm = oUdfForm.Items.Item(i);
-                                if (itm.UniqueID != fieldUid && itm.UniqueID != "-" + fieldUid && itm.Top >= oldBottom - 4)
-                                {
-                                    itm.Top -= shrinkBy;
-                                }
-                            }
-                        }
-                    }
-                    catch { }
-                }
-                oUdfForm.Freeze(false);
-            }
-            catch (Exception ex)
-            {
-                try { oUdfForm.Freeze(false); } catch { }
-                LoggerHelper.Log($"Error compacting UDF panel: {ex.Message}");
-            }
-        }
-
         public static void DrawLegacyButtonCombos(Form oForm)
         {
             try
