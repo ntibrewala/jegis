@@ -57,7 +57,7 @@ namespace GIS.Framework.Helpers
                 };
             }
 
-            // Fetch dynamic AUTH_URL from database
+            // Fetch dynamic AUTH_URL from database (@GIS_EI_OAPI or fallback to @GIS_EW_OAPI)
             string authUrl = "";
             string urlQuery = "SELECT MAX(\"U_Url\") FROM \"@GIS_EI_OAPI\" WHERE \"U_Action\" = 'GenerateKey'";
             var dtUrl = dbHelper.ExecuteQuery(urlQuery);
@@ -67,17 +67,27 @@ namespace GIS.Framework.Helpers
             }
             if (string.IsNullOrEmpty(authUrl))
             {
-                authUrl = "https://gstsandbox.charteredinfo.com/eivital/dec/v1.04/auth"; // fallback
+                var dtEwUrl = dbHelper.ExecuteQuery("SELECT MAX(\"U_Url\") FROM \"@GIS_EW_OAPI\" WHERE \"U_Action\" = 'GenerateKey'");
+                if (dtEwUrl != null && dtEwUrl.Rows.Count > 0 && dtEwUrl.Rows[0][0] != DBNull.Value)
+                {
+                    authUrl = dtEwUrl.Rows[0][0].ToString();
+                }
+            }
+            if (string.IsNullOrEmpty(authUrl))
+            {
+                authUrl = "https://einvapi.charteredinfo.com/v1.03/dec/auth?action=ACCESSTOKEN"; // fallback
             }
 
-            // 2. Map DB Credentials to HTTP Headers
+            // 2. Map DB Credentials to HTTP Headers (support both v1.04 eivital and v1.03 EWB ACCESSTOKEN endpoints)
             var headers = new Dictionary<string, string>
             {
                 { "aspid", credentials.AspId },
                 { "password", credentials.AspPassword },
-                { "Gstin", credentials.GSTIN },             // Strictly 'Gstin'
-                { "user_name", credentials.UserName },       // Strictly 'user_name' in v1.04
-                { "eInvPwd", credentials.ApiPassword }      // Required for E-Invoice token
+                { "Gstin", credentials.GSTIN },
+                { "user_name", credentials.UserName },       // Required by v1.04 E-Invoice Auth
+                { "UserName", credentials.UserName },        // Required by v1.03 E-Way Bill Auth
+                { "eInvPwd", credentials.ApiPassword },      // Required by v1.04 E-Invoice Auth
+                { "EwbPwd", credentials.ApiPassword }        // Required by v1.03 E-Way Bill Auth
             };
 
             if (forceRefresh)
